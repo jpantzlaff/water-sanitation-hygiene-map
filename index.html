@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="author" content="Johnathon Pantzlaff, Alicea Zelesny">
+        <title>WASH Viewer</title>
+        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tajawal">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/w3.css">
+        <link rel="stylesheet" href="css/w3-theme-dark-grey.css">
+        <link rel="stylesheet" href="css/index.css">
+    </head>
+    <body>
+        <div id="panel" class="w3-theme-d5">
+            <select id="region-select" class="w3-select w3-round w3-theme-l1">
+                <option disabled selected style="display:none">Select a region...</option>
+                <option class="w3-theme-l4">Eastern Africa</option>
+                <option class="w3-theme-l4">Middle Africa</option>
+                <option class="w3-theme-l4">Northern Africa</option>
+                <option class="w3-theme-l4">Southern Africa</option>
+                <option class="w3-theme-l4">Western Africa</option>
+                <option class="w3-theme-l4">Central Asia</option>
+                <option class="w3-theme-l4">Eastern Asia</option>
+                <option class="w3-theme-l4">Southeastern Asia</option>
+                <option class="w3-theme-l4">Southern Asia</option>
+                <option class="w3-theme-l4">Western Asia</option>
+            </select>
+        </div>
+        <div id="map_info">
+            <div id="map-parent">
+                <div id="map"></div>
+            </div>
+            <div id="info" class="w3-theme-d5">
+                <p id="info-title">Name of some place</p>
+            </div>
+        </div>
+        
+        <!-- EXTERNAL SCRIPTS -->
+        <script src="lib/topojson-client.js"></script>
+        <script src="lib/jquery-3.3.1.min.js"></script>
+        <script src="lib/d3.v4.min.js"></script>
+        <script src="lib/leaflet.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>

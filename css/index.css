@@ -1,0 +1,38 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Tajawal', sans-serif;
+}
+body {
+    display: flex;
+}
+#panel {
+    padding: 1em;
+    min-width: 300px;
+}
+#region-select {
+    border: none;
+    padding: 0.5em;
+}
+#region-select > option {
+    color: #000;
+    background-color: #dfdfdf;
+}
+#map_info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-left: 1px solid #818181;
+}
+#map, #map-parent {
+    height: 100%;
+    width: 100%;
+}
+@media (max-width: 600px) {
+    body {
+        flex-direction: column-reverse;
+    }
+    #map_info {
+        border-left: none;
+    }
+}
