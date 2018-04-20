@@ -24,6 +24,40 @@ body {
     width: 100%;
     border-left: 1px solid #818181;
 }
+#info {
+    padding: 0.7em;
+}
+#stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+#stats p {
+    text-align: center;
+    margin: 0;
+}
+#stats > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    flex: 0 1 12em;
+    margin: 0.6em 0.4em;
+}
+#stats > div > :nth-child(1) {
+    line-height: 90%;
+    color: #eee;
+    font-size: 110%;
+    font-variant: small-caps;
+}
+#stats > div > :nth-child(2) {
+    flex-basis: 2em;
+    line-height: 2em;
+    font-size: 150%;
+}
+#stats > div > :nth-child(3) {
+    color: #bbb;
+    font-size: 80%;
+}
 #map, #map-parent {
     height: 100%;
     width: 100%;
