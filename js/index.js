@@ -32,19 +32,21 @@ let basemap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/li
 basemap.addTo(map);
 
 let countries = L.geoJSON();
+let active = L.geoJSON();
 
 $.get({
-    url: 'data/countries.topojson',
+    url: 'data/combined.topojson',
     dataType: 'json',
     success: function(d) {
-        features = topojson.feature(d, d.objects.countries);
-        draw();
+        countryData = topojson.feature(d, d.objects.countries);
+        regionData = topojson.feature(d, d.objects.regions);
+        drawCountries();
     }
 });
 
-function draw(mode='drinking') {
+function drawCountries(mode='drinking') {
     countries.clearLayers();
-    countries = L.geoJSON(features, {
+    countries = L.geoJSON(countryData, {
         /* For each feature in the GeoJSON: */
         style: function(feature) {
             return {
@@ -53,15 +55,33 @@ function draw(mode='drinking') {
             };
         },
         onEachFeature: function(feature, layer) {
+            let p = feature.properties;
             layer
                 .on('click', function() {
-                    console.log(feature.properties);
+                    console.log(p);
+                    drawActive('country', p.name);
                 })
                 .on('mouseover', function() {
-                    console.log(feature.properties);
+                    console.log(p);
                 });
         }
     });
     /* Add the countries layer to the map if it isn't added already */
     countries.addTo(map);
 }
+
+function drawActive(type, name) {
+    active.clearLayers();
+    active = L.geoJSON(window[type + 'Data'], {
+        filter: function(feature) {
+            return feature.properties.name === name;
+        }
+    });
+    active.addTo(map);
+    map.fitBounds(active.getBounds());
+}
+
+$('#region-select').on('change', function() {
+    drawActive('region', $(this).val());
+    $(this).val('Go to a region...');
+});
