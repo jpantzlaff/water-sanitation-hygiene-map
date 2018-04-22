@@ -1,9 +1,24 @@
-let colors = {
-    drinking: ['#0cf', '#fff'],
-    sanitation: ['#2c7', '#fff'],
-    handwashing: ['#07f', '#fff'],
-    defecation: ['#fff', '#f50'],
-    mortality: ['#fff', '#fd0']
+let themes = {
+    drinking: {
+        title: 'Basic and safely managed drinking water services',
+        colors: ['#0cf', '#ccc'],
+    },
+    sanitation: {
+        title: 'Basic and safely managed sanitation services',
+        colors: ['#2c7', '#ccc']
+    },
+    handwashing: {
+        title: 'Handwashing with soap',
+        colors: ['#07f', '#ccc']
+    },
+    defecation: {
+        title: 'Open defecation',
+        colors: ['#ccc', '#f50']
+    },
+    mortality: {
+        title: 'Mortality attributed to unsafe WASH services',
+        colors: ['#ccc', '#fd0']
+    }
 };
 
 /* Create a Leaflet map in the "map" div */
@@ -14,7 +29,7 @@ let map = L.map('map', {
     minZoom: 3,
     maxZoom: 6,
     /* Limit panning to the area of interest */
-    maxBounds: [[-35, -19], [56, 155]],
+    maxBounds: [[-35, -30], [56, 155]],
     maxBoundsViscosity: 0.9,
     /* Remove zoom buttons */
     zoomControl: false,
@@ -22,14 +37,24 @@ let map = L.map('map', {
     attributionControl: false
 });
 /* Set the map's initial extent to the area of interest */
-map.fitBounds([[-35, -19], [56, 155]]);
+map.fitBounds([[-35, -30], [56, 155]]);
 
 /* Create the basemap */
-let basemap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+let basemap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
 	subdomains: 'abcd'
 });
 /* Add the basemap to the map */
 basemap.addTo(map);
+
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 450;
+map.getPane('labels').style.pointerEvents = 'none';
+
+let labels = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
+	subdomains: 'abcd',
+    pane: 'labels'
+});
+labels.addTo(map);
 
 let countries = L.geoJSON();
 let active = L.geoJSON();
@@ -39,6 +64,18 @@ $.get({
     dataType: 'json',
     success: function(d) {
         countryData = topojson.feature(d, d.objects.countries);
+        $.each(themes, function(theme, v) {
+            let values = [];
+            countryData.features.forEach(i => values.push(i.properties[theme]));
+            v.min = Math.min.apply(null, values);
+            v.max = Math.max.apply(null, values);
+            v.scale = d3.scaleLinear()
+                .domain([v.min, v.max])
+                .range(v.colors);
+            v.opacity = d3.scaleLinear()
+                .domain([v.min, v.max])
+                .range([0.6, 0.3]);
+        });
         regionData = topojson.feature(d, d.objects.regions);
         drawCountries();
     }
@@ -49,9 +86,12 @@ function drawCountries(mode='drinking') {
     countries = L.geoJSON(countryData, {
         /* For each feature in the GeoJSON: */
         style: function(feature) {
+            let p = feature.properties;
             return {
-                fillColor: colors[mode][0],
-                color: colors[mode][0]
+                fillColor: themes[mode].scale(p[mode]),
+                fillOpacity: themes[mode].opacity(p[mode]),
+                color: '#000',
+                weight: 0.2
             };
         },
         onEachFeature: function(feature, layer) {
@@ -73,8 +113,12 @@ function drawCountries(mode='drinking') {
 function drawActive(type, name) {
     active.clearLayers();
     active = L.geoJSON(window[type + 'Data'], {
-        filter: function(feature) {
-            return feature.properties.name === name;
+        interactive: false,
+        filter: feature => feature.properties.name === name,
+        style: {
+            fill: false,
+            color: '#000',
+            weight: 3
         }
     });
     active.addTo(map);
