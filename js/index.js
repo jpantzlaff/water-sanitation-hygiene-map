@@ -1,22 +1,32 @@
 let themes = {
     drinking: {
         title: 'Basic and safely managed drinking water services',
+        suffix: '%',
+        stat: 'of population has access',
         colors: ['#0cf', '#ccc'],
     },
     sanitation: {
         title: 'Basic and safely managed sanitation services',
+        suffix: '%',
+        stat: 'of population has access',
         colors: ['#2c7', '#ccc']
     },
     handwashing: {
         title: 'Handwashing with soap',
+        suffix: '%',
+        stat: 'of population practices',
         colors: ['#07f', '#ccc']
     },
     defecation: {
         title: 'Open defecation',
+        suffix: '%',
+        stat: 'of population practices',
         colors: ['#ccc', '#f50']
     },
     mortality: {
-        title: 'Mortality attributed to unsafe WASH services',
+        title: 'Mortality attributed to unsafe wash services',
+        suffix: '',
+        stat: 'deaths per 100,000 people',
         colors: ['#ccc', '#fd0']
     }
 };
@@ -65,6 +75,13 @@ $.get({
     success: function(d) {
         countryData = topojson.feature(d, d.objects.countries);
         $.each(themes, function(theme, v) {
+            $('#stats').append(`
+                <div>
+                    <p>${v.title}</p>
+                    <p><data id="${theme}-stat"></data>${v.suffix}</p>
+                    <p>${v.stat}</p>
+                </div>
+            `);
             let values = [];
             countryData.features.forEach(i => values.push(i.properties[theme]));
             v.min = Math.min.apply(null, values);
@@ -98,11 +115,11 @@ function drawCountries(mode='drinking') {
             let p = feature.properties;
             layer
                 .on('click', function() {
-                    console.log(p);
-                    drawActive('country', p.name);
+                    //console.log(p);
+                    drawActive('country', p);
                 })
                 .on('mouseover', function() {
-                    console.log(p);
+                    //console.log(p);
                 });
         }
     });
@@ -110,11 +127,11 @@ function drawCountries(mode='drinking') {
     countries.addTo(map);
 }
 
-function drawActive(type, name) {
+function drawActive(type, prop) {
     active.clearLayers();
     active = L.geoJSON(window[type + 'Data'], {
         interactive: false,
-        filter: feature => feature.properties.name === name,
+        filter: feature => feature.properties.name === prop.name,
         style: {
             fill: false,
             color: '#000',
@@ -123,6 +140,18 @@ function drawActive(type, name) {
     });
     active.addTo(map);
     map.fitBounds(active.getBounds());
+    if (type === 'country') {
+        $.each(themes, function(theme) {
+            if (prop[theme] === null) {
+                $(`#${theme}-stat`).html('Unknown ');
+            } else if (theme === 'mortality') {
+                $(`#${theme}-stat`).html(prop[theme].toFixed(1));
+            } else {
+                $(`#${theme}-stat`).html(prop[theme]);
+            }
+        });
+    }
+    $('#info').show();
 }
 
 $('#region-select').on('change', function() {

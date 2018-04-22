@@ -25,6 +25,7 @@ body {
     border-left: 1px solid #818181;
 }
 #info {
+    display: none;
     padding: 0.7em;
 }
 #stats {
