@@ -22,20 +22,30 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    border-left: 1px solid #818181;
 }
 #info {
     display: none;
     padding: 0.7em;
+    border-left: 1px solid #818181;
+}
+#close {
+    position: absolute;
+    left: calc(100% - 28px);
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
 }
 #stats {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
 }
-#stats p {
+#info p {
     text-align: center;
     margin: 0;
+}
+#info-title {
+    font-size: 140%;
 }
 #stats > div {
     display: flex;

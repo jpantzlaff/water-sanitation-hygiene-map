@@ -140,6 +140,7 @@ function drawActive(type, prop) {
     });
     active.addTo(map);
     map.fitBounds(active.getBounds());
+    $('#info-title').html(prop.name);
     if (type === 'country') {
         $.each(themes, function(theme) {
             if (prop[theme] === null) {
@@ -152,9 +153,16 @@ function drawActive(type, prop) {
         });
     }
     $('#info').show();
+    map.invalidateSize();
 }
 
 $('#region-select').on('change', function() {
-    drawActive('region', $(this).val());
+    drawActive('region', {name: $(this).val()});
     $(this).val('Go to a region...');
+});
+
+$('#close').on('click', function() {
+    active.clearLayers();
+    $('#info').hide();
+    map.invalidateSize();
 });
