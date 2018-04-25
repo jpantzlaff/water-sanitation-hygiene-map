@@ -8,7 +8,8 @@ body {
 }
 #panel {
     padding: 1em;
-    min-width: 300px;
+    min-width: 500px;
+    overflow-y: auto;
 }
 #region-select {
     border: none;
@@ -17,6 +18,29 @@ body {
 #region-select > option {
     color: #000;
     background-color: #dfdfdf;
+}
+#charts > div {
+    padding: 2em 0 1em 0;
+    border-top: 1px solid #888;
+}
+#charts > div:first-child {
+    border-top: none;
+}
+.chart {
+    display: flex;
+    flex-direction: row;
+    min-height: 100px;
+    align-items: flex-end;
+    margin-bottom: 1em;
+}
+.chart-title {
+    margin: 0;
+    text-align: center;
+    /*font-variant: small-caps;*/
+}
+.bar {
+    flex: 1;
+    margin: 0 1px;
 }
 #map_info {
     display: flex;
@@ -55,10 +79,8 @@ body {
     margin: 0.6em 0.4em;
 }
 #stats > div > :nth-child(1) {
-    line-height: 90%;
-    color: #eee;
-    font-size: 110%;
-    font-variant: small-caps;
+    line-height: 100%;
+    color: #ddd;
 }
 #stats > div > :nth-child(2) {
     flex-basis: 2em;

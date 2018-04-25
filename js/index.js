@@ -24,7 +24,7 @@ let themes = {
         colors: ['#ccc', '#f50']
     },
     mortality: {
-        title: 'Mortality attributed to unsafe wash services',
+        title: 'Mortality attributed to unsafe WASH services',
         suffix: '',
         stat: 'deaths per 100,000 people',
         colors: ['#ccc', '#fd0']
@@ -92,6 +92,38 @@ $.get({
             v.opacity = d3.scaleLinear()
                 .domain([v.min, v.max])
                 .range([0.6, 0.3]);
+            v.height = d3.scaleLinear()
+                .domain([v.min, v.max])
+                .range([0, 100]);
+            
+            $('#charts').append(`
+                <div id="${theme}-chart">
+                    <p class="chart-title">${themes[theme].title}</p>
+                </div>
+            `);
+            
+            let chart = d3.select(`#${theme}-chart`)
+                /* Append a div element to hold bars */
+                .insert('div', ':first-child')
+                /* Make the element part of the "chart" class */
+                .attr('class', 'chart');
+
+            /* Make a selection to begin inserting bars */
+            let bars = chart.selectAll('.bars')
+                /* Set the data source as the country data object */
+                .data(countryData.features)
+                /* Recurse through the object */
+                .enter()
+                /* Append a div for each bar */
+                .append('div')
+                /* Sort the bars by value */
+                .sort((a, b) => a.properties[theme] - b.properties[theme])
+                /* Set class names for the bars; all are in "bar", and each bar is also added to a class based on its value */
+                .attr('class', d => 'bar ' + d.properties.abbr)
+                /* Set the fill color using the same scales as the map */
+                .style('background-color', d => themes[theme].scale(d.properties[theme]))
+                /* Set the height of each bar using its value, scaled between 0 and 100 */
+                .style('height', d => themes[theme].height(d.properties[theme]) + 'px');
         });
         regionData = topojson.feature(d, d.objects.regions);
         drawCountries();
