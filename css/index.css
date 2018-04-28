@@ -1,14 +1,29 @@
 html, body {
     height: 100%;
     width: 100%;
+}
+* {
     font-family: 'Tajawal', sans-serif;
 }
 body {
     display: flex;
 }
+.leaflet-tooltip {
+    background-color: #303030 !important;
+    color: white;
+}
+.leaflet-tooltip::before {
+    display: none;
+}
+.leaflet-tooltip p {
+    font-size: 1.1em;
+    text-align: center;
+    margin: 0;
+}
 #panel {
     padding: 1em;
-    min-width: 500px;
+    flex-basis: 500px;
+    max-width: 50%;
     overflow-y: auto;
 }
 #region-select {
@@ -19,12 +34,15 @@ body {
     color: #000;
     background-color: #dfdfdf;
 }
-#charts > div {
-    padding: 2em 0 1em 0;
-    border-top: 1px solid #888;
+.chart-tile {
+    margin: 1em 0;
+    border: #666 solid 1.3px;
+    padding: 10px 8px;
+    border-radius: 3px;
+    cursor: pointer;
 }
-#charts > div:first-child {
-    border-top: none;
+.chart-tile:hover, .chart-title.active {
+    background-color: #555;
 }
 .chart {
     display: flex;

@@ -97,7 +97,7 @@ $.get({
                 .range([0, 100]);
             
             $('#charts').append(`
-                <div id="${theme}-chart">
+                <div id="${theme}-chart" class="chart-tile">
                     <p class="chart-title">${themes[theme].title}</p>
                 </div>
             `);
@@ -137,7 +137,7 @@ function drawCountries(mode='drinking') {
         style: function(feature) {
             let p = feature.properties;
             return {
-                fillColor: themes[mode].scale(p[mode]),
+                fillColor: (p[mode] !== null ? themes[mode].scale(p[mode]) : 'black'),
                 fillOpacity: themes[mode].opacity(p[mode]),
                 color: '#000',
                 weight: 0.2
@@ -151,12 +151,27 @@ function drawCountries(mode='drinking') {
                     drawActive('country', p);
                 })
                 .on('mouseover', function() {
-                    //console.log(p);
+                    //drawActive('country', p);
+                })
+                .on('mouseout', function() {
+                    
+                })
+                .bindTooltip(`
+                    <p>${p.name}</p>
+                    <p>${formatStat(p[mode], mode)}</p>
+                `, {
+                    sticky: true
                 });
         }
     });
     /* Add the countries layer to the map if it isn't added already */
     countries.addTo(map);
+}
+
+function formatStat(stat, theme) {
+    if (stat === null) return 'Unknown ' + themes[theme].suffix;
+    else if (theme === 'mortality') return stat.toFixed(1);
+    else return stat + themes[theme].suffix;
 }
 
 function drawActive(type, prop) {
@@ -174,15 +189,7 @@ function drawActive(type, prop) {
     map.fitBounds(active.getBounds());
     $('#info-title').html(prop.name);
     if (type === 'country') {
-        $.each(themes, function(theme) {
-            if (prop[theme] === null) {
-                $(`#${theme}-stat`).html('Unknown ');
-            } else if (theme === 'mortality') {
-                $(`#${theme}-stat`).html(prop[theme].toFixed(1));
-            } else {
-                $(`#${theme}-stat`).html(prop[theme]);
-            }
-        });
+        $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
     }
     $('#info').show();
     map.invalidateSize();
