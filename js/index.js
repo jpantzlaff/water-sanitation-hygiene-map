@@ -31,6 +31,21 @@ let themes = {
     }
 };
 
+let contextStats = {
+    region: {
+        title: 'Region'
+    },
+    gdp: {
+        title: 'Gross Domestic Product'
+    },
+    gni: {
+        title: 'Gross National Income'
+    },
+    fsi: {
+        title: 'Fragile States Index'
+    }
+};
+
 /* Create a Leaflet map in the "map" div */
 let map = L.map('map', {
     /* Render with Canvas rather than the default SVG */
@@ -74,11 +89,19 @@ $.get({
     dataType: 'json',
     success: function(d) {
         countryData = topojson.feature(d, d.objects.countries);
+        $.each(contextStats, function(stat, v) {
+            $('#context').append(`
+                <div>
+                    <p>${v.title}</p>
+                    <p id="${stat}-stat"></p>
+                </div>
+            `);
+        });
         $.each(themes, function(theme, v) {
             $('#stats').append(`
                 <div>
                     <p>${v.title}</p>
-                    <p><data id="${theme}-stat"></data>${v.suffix}</p>
+                    <p id="${theme}-stat"></p>
                     <p>${v.stat}</p>
                 </div>
             `);
@@ -174,6 +197,18 @@ function formatStat(stat, theme) {
     else return stat + themes[theme].suffix;
 }
 
+function formatCurrency(v, precision) {
+    if (v === null) return 'Unknown';
+    let styled = v.toLocaleString('en-US');
+    let first = Number(styled.slice(0, precision + 1).replace(',', '.'));
+    let commas = (styled.match(/,/g) || []).length;
+    if (commas === 4) return '$' + first + 'T';
+    else if (commas === 3) return '$' + first + 'B';
+    else if (commas === 2) return '$' + first + 'M';
+    else if (commas === 1) return '$' + first + 'K';
+    else return '$' + styled;
+}
+
 function drawActive(type, prop) {
     active.clearLayers();
     active = L.geoJSON(window[type + 'Data'], {
@@ -190,6 +225,10 @@ function drawActive(type, prop) {
     $('#info-title').html(prop.name);
     if (type === 'country') {
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
+        $.each(contextStats, stat => {
+            if (stat === 'region' || stat === 'fsi') $(`#${stat}-stat`).html(prop[stat]);
+            else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
+        });
     }
     $('#info').show();
     map.invalidateSize();
