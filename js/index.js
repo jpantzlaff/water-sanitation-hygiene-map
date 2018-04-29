@@ -155,10 +155,34 @@ $.get({
                 .on('click', makeActiveD3);
         });
         regionData = topojson.feature(d, d.objects.regions);
+        
+        for (i = 0; i < regionData.features.length; i++) {
+            let rProp = regionData.features[i].properties;
+            ['gdp', 'gni', 'fsi', 'countries'].forEach(p => rProp[p] = []);
+            countryData.features.forEach(c => {
+                let cProp = c.properties;
+                if (cProp.region === rProp.name) {
+                    rProp.gdp.push(cProp.gdp);
+                    rProp.gni.push(cProp.gni);
+                    rProp.fsi.push(cProp.fsi);
+                    rProp.countries.push(cProp.abbr);
+                }
+            });
+            rProp.gdp = arrayStat(rProp.gdp, 'sum');
+            rProp.gni = arrayStat(rProp.gni, 'mean');
+            rProp.fsi = arrayStat(rProp.fsi, 'mean');
+        }
         drawCountries('drinking');
         $('body').css('visibility', 'visible');
     }
 });
+
+function arrayStat(array, stat) {
+    let sum = 0;
+    array.forEach(v => sum += v);
+    if (stat === 'sum') return sum;
+    else if (stat === 'mean') return sum / array.length;
+}
 
 function drawCountries(mode) {
     $('.chart-tile').removeClass('active');
@@ -227,7 +251,14 @@ function makeActiveD3(d) {
 
 let activeFeature = null;
 
+function getRegionProp(name) {
+    for (i = 0; i < regionData.features.length; i++) {
+        if (regionData.features[i].properties.name === name) return regionData.features[i].properties;
+    }
+}
+
 function makeActive(type, prop, event) {
+    if (type === 'region') prop = getRegionProp(prop);
     if (event === 'mouseout') {
         if (!!activeFeature) {
             type = activeFeature.type;
@@ -239,7 +270,6 @@ function makeActive(type, prop, event) {
     }
     active.clearLayers();
     $('.bar').addClass('inactive');
-    $('.' + prop.abbr).removeClass('inactive');
     active = L.geoJSON(window[type + 'Data'], {
         interactive: false,
         filter: feature => feature.properties.name === prop.name,
@@ -254,14 +284,16 @@ function makeActive(type, prop, event) {
     $('.stat').hide();
     $('.stat.' + type).show();
     if (type === 'country') {
+        $('.' + prop.abbr).removeClass('inactive');
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
-        $.each(contextStats, stat => {
-            if (stat === 'region' || stat === 'fsi') $(`#${stat}-stat`).html(prop[stat]);
-            else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
-        });
     } else if (type === 'region') {
-        
+        prop.countries.forEach(abbr => $('.' + abbr).removeClass('inactive'));
     }
+    $.each(contextStats, stat => {
+        if (stat === 'region') $(`#${stat}-stat`).html(prop[stat]);
+        else if (stat === 'fsi') $(`#${stat}-stat`).html(prop[stat].toFixed(1));
+        else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
+    });
     if (event === 'click') {
         activeFeature = {
             type: type,
@@ -269,12 +301,12 @@ function makeActive(type, prop, event) {
         };
         map.fitBounds(active.getBounds());
         $('#info').show();
-        map.invalidateSize();
     }
+    map.invalidateSize();
 }
 
 $('#region-select').on('change', function() {
-    makeActive('region', {name: $(this).val()}, 'click');
+    makeActive('region', $(this).val(), 'click');
     $(this).val('Go to a region...');
 });
 
