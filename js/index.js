@@ -127,7 +127,7 @@ $.get({
                 .range([0, 100]);
             
             $('#charts').append(`
-                <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}')">
+                <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
                     <p class="chart-title">${themes[theme].title}</p>
                 </div>
             `);
@@ -186,7 +186,9 @@ function arrayStat(array, stat) {
     else if (stat === 'mean') return sum / array.length;
 }
 
-function drawCountries(mode) {
+function drawCountries(mode, event='click') {
+    if (event === 'click') activeMode = mode;
+    else if (event === 'mouseout') mode = activeMode;
     $('.chart-tile').removeClass('active');
     $(`#${mode}-chart`).addClass('active');
     countries.clearLayers();

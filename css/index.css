@@ -65,6 +65,7 @@ body {
 }
 .chart-tile.active {
     background-color: rgba(255, 255, 255, 0.15);
+    transition: background-color 0.4s;
 }
 .chart {
     display: flex;
@@ -76,7 +77,6 @@ body {
 .chart-title {
     margin: 0;
     text-align: center;
-    /*font-variant: small-caps;*/
 }
 .bar {
     flex: 1;
