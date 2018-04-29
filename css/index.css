@@ -118,7 +118,7 @@ body {
     padding: 0.7em;
     border-left: 1px solid #818181;
 }
-#close {
+.close {
     position: absolute;
     left: calc(100% - 28px);
     font-size: 1.2em;
