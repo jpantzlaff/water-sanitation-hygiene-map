@@ -146,14 +146,15 @@ $.get({
                 /* Set the fill color using the same scales as the map */
                 .style('background-color', d => themes[theme].scale(d.properties[theme]))
                 /* Set the height of each bar using its value, scaled between 0 and 100 */
-                .style('height', d => themes[theme].height(d.properties[theme]) + 'px');
+                .style('height', d => themes[theme].height(d.properties[theme]) + 'px')
+                .on('click', makeActiveD3);
         });
         regionData = topojson.feature(d, d.objects.regions);
-        drawCountries();
+        drawCountries('drinking');
     }
 });
 
-function drawCountries(mode='drinking') {
+function drawCountries(mode) {
     $('.chart-tile').removeClass('active');
     $(`#${mode}-chart`).addClass('active');
     countries.clearLayers();
@@ -173,10 +174,9 @@ function drawCountries(mode='drinking') {
             layer
                 .on('click', function() {
                     //console.log(p);
-                    drawActive('country', p);
+                    makeActive('country', p);
                 })
                 .on('mouseover', function() {
-                    //drawActive('country', p);
                 })
                 .on('mouseout', function() {
                     
@@ -215,8 +215,16 @@ function formatCurrency(v, precision) {
     else return '$' + styled;
 }
 
-function drawActive(type, prop) {
+function makeActiveD3(d) {
+    makeActive('country', d.properties, d3.event.type);
+}
+
+function makeActive(type, prop, event=null) {
+    console.log(prop);
+    console.log(event);
     active.clearLayers();
+    $('.bar').addClass('inactive');
+    $('.' + prop.abbr).removeClass('inactive');
     active = L.geoJSON(window[type + 'Data'], {
         interactive: false,
         filter: feature => feature.properties.name === prop.name,
@@ -241,12 +249,13 @@ function drawActive(type, prop) {
 }
 
 $('#region-select').on('change', function() {
-    drawActive('region', {name: $(this).val()});
+    makeActive('region', {name: $(this).val()});
     $(this).val('Go to a region...');
 });
 
 $('#close').on('click', function() {
     active.clearLayers();
+    $('.inactive').removeClass('inactive');
     $('#info').hide();
     map.invalidateSize();
 });
