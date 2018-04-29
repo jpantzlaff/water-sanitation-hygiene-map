@@ -189,6 +189,7 @@ function arrayStat(array, stat) {
 }
 
 function drawCountries(mode, event='click') {
+    currentMode = mode;
     if (event === 'click') activeMode = mode;
     else if (event === 'mouseout') mode = activeMode;
     $('.chart-tile').removeClass('active');
@@ -252,7 +253,19 @@ function formatCurrency(v, precision) {
 }
 
 function makeActiveD3(d) {
-    makeActive('country', d.properties, d3.event.type);
+    let event = d3.event;
+    makeActive('country', d.properties, event.type);
+    let p = themes[currentMode];
+    $('.leaflet-tooltip-pane').html(`
+        <div class="leaflet-tooltip chart-tooltip">
+            <p>${d.properties.name}</p>
+            <p>${p.title}</p>
+            <div style="display:flex">
+                <p>${formatStat(d.properties[currentMode], currentMode)}</p>
+                <p>${p.stat}</p>
+            </div>
+        </div>
+    `);
 }
 
 let activeFeature = null;
