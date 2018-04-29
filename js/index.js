@@ -68,22 +68,24 @@ let map = L.map('map', {
 /* Set the map's initial extent to the area of interest */
 map.fitBounds([[-35, -30], [56, 155]]);
 
-/* Create the basemap */
-let basemap = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
+/* Create the basemap and add to map */
+L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
 	subdomains: 'abcd'
-});
-/* Add the basemap to the map */
-basemap.addTo(map);
+}).addTo(map);
 
 map.createPane('labels');
 map.getPane('labels').style.zIndex = 450;
 map.getPane('labels').style.pointerEvents = 'none';
 
-let labels = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
+L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
 	subdomains: 'abcd',
     pane: 'labels'
-});
-labels.addTo(map);
+}).addTo(map);
+
+L.control.attribution({
+    position: 'bottomright',
+    prefix: `<a href="http://leafletjs.com">Leaflet</a> | Basemap: &copy;&nbsp;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy;&nbsp;<a href="https://carto.com/attribution/">CARTO</a> | Countries: <a href="http://www.naturalearthdata.com/">Natural Earth</a> | Economic Indicators: <a href="http://www.worldbank.org/">The World Bank</a> | Fragile States Index: <a href="http://global.fundforpeace.org/index.php">Fund for Peace</a> | WASH Data: <a href="http://www.who.int/">World Health Organization</a> | <a href="#" onclick="$('#credits').show()">Full Credits</a>`
+}).addTo(map);
 
 let countries = L.geoJSON();
 let active = L.geoJSON();
