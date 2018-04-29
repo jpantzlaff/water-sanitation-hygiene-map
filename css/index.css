@@ -3,7 +3,11 @@ html, body {
     width: 100%;
 }
 * {
-    font-family: 'Tajawal', sans-serif;
+    font-family: 'Tajawal', sans-serif !important;
+}
+.w3-modal {
+    z-index: 1000 !important;
+    padding-bottom: 100px;
 }
 body {
     visibility: hidden;
@@ -40,6 +44,17 @@ body {
     margin: 0 0.5em;
     color: #ddd;
     font-size: 90%;
+}
+#credits h6 {
+    font-size: 1.1em;
+    margin: 0;
+}
+.citation {
+    text-indent: 2em hanging;
+    margin: 0.5em 0 1.5em 0;
+}
+.citation a {
+    word-break: break-word;
 }
 #panel {
     flex: 1 1 auto;
