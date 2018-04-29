@@ -173,13 +173,13 @@ function drawCountries(mode) {
             let p = feature.properties;
             layer
                 .on('click', function() {
-                    //console.log(p);
-                    makeActive('country', p);
+                    makeActive('country', p, 'click');
                 })
                 .on('mouseover', function() {
+                    makeActive('country', p, 'mouseover');
                 })
                 .on('mouseout', function() {
-                    
+                    makeActive('country', p, 'mouseout');
                 })
                 .bindTooltip(`
                     <p>${p.name}</p>
@@ -219,9 +219,11 @@ function makeActiveD3(d) {
     makeActive('country', d.properties, d3.event.type);
 }
 
-function makeActive(type, prop, event=null) {
-    console.log(prop);
-    console.log(event);
+function makeActive(type, prop, event) {
+    if (event === 'mouseout' && typeof(activeFeature) !== 'undefined') {
+        type = activeFeature.type;
+        prop = activeFeature.prop;
+    }
     active.clearLayers();
     $('.bar').addClass('inactive');
     $('.' + prop.abbr).removeClass('inactive');
@@ -235,7 +237,6 @@ function makeActive(type, prop, event=null) {
         }
     });
     active.addTo(map);
-    map.fitBounds(active.getBounds());
     $('#info-title').html(prop.name);
     if (type === 'country') {
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
@@ -244,12 +245,19 @@ function makeActive(type, prop, event=null) {
             else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
         });
     }
-    $('#info').show();
-    map.invalidateSize();
+    if (event === 'click') {
+        activeFeature = {
+            type: type,
+            prop: prop
+        };
+        map.fitBounds(active.getBounds());
+        $('#info').show();
+        map.invalidateSize();
+    }
 }
 
 $('#region-select').on('change', function() {
-    makeActive('region', {name: $(this).val()});
+    makeActive('region', {name: $(this).val()}, 'click');
     $(this).val('Go to a region...');
 });
 
