@@ -219,10 +219,17 @@ function makeActiveD3(d) {
     makeActive('country', d.properties, d3.event.type);
 }
 
+let activeFeature = null;
+
 function makeActive(type, prop, event) {
-    if (event === 'mouseout' && typeof(activeFeature) !== 'undefined') {
-        type = activeFeature.type;
-        prop = activeFeature.prop;
+    if (event === 'mouseout') {
+        if (!!activeFeature) {
+            type = activeFeature.type;
+            prop = activeFeature.prop;
+        } else {
+            removeActive();
+            return;
+        }
     }
     active.clearLayers();
     $('.bar').addClass('inactive');
@@ -261,9 +268,14 @@ $('#region-select').on('change', function() {
     $(this).val('Go to a region...');
 });
 
-$('#close').on('click', function() {
+function removeActive() {
+    activeFeature = null;
     active.clearLayers();
     $('.inactive').removeClass('inactive');
     $('#info').hide();
     map.invalidateSize();
+}
+
+$('#close').on('click', function() {
+    removeActive();
 });
