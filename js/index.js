@@ -114,13 +114,13 @@ $.get({
                 .range(v.colors);
             v.opacity = d3.scaleLinear()
                 .domain([v.min, v.max])
-                .range([0.6, 0.3]);
+                .range([0.75, 0.6]);
             v.height = d3.scaleLinear()
                 .domain([v.min, v.max])
                 .range([0, 100]);
             
             $('#charts').append(`
-                <div id="${theme}-chart" class="chart-tile">
+                <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}')">
                     <p class="chart-title">${themes[theme].title}</p>
                 </div>
             `);
@@ -154,13 +154,15 @@ $.get({
 });
 
 function drawCountries(mode='drinking') {
+    $('.chart-tile').removeClass('active');
+    $(`#${mode}-chart`).addClass('active');
     countries.clearLayers();
     countries = L.geoJSON(countryData, {
         /* For each feature in the GeoJSON: */
         style: function(feature) {
             let p = feature.properties;
             return {
-                fillColor: (p[mode] !== null ? themes[mode].scale(p[mode]) : 'black'),
+                fillColor: (p[mode] !== null ? themes[mode].scale(p[mode]) : 'white'),
                 fillOpacity: themes[mode].opacity(p[mode]),
                 color: '#000',
                 weight: 0.2
@@ -181,7 +183,11 @@ function drawCountries(mode='drinking') {
                 })
                 .bindTooltip(`
                     <p>${p.name}</p>
-                    <p>${formatStat(p[mode], mode)}</p>
+                    <p>${themes[mode].title}</p>
+                    <div style="display:flex">
+                        <p>${formatStat(p[mode], mode)}</p>
+                        <p>${themes[mode].stat}</p>
+                    </div>
                 `, {
                     sticky: true
                 });
@@ -200,12 +206,12 @@ function formatStat(stat, theme) {
 function formatCurrency(v, precision) {
     if (v === null) return 'Unknown';
     let styled = v.toLocaleString('en-US');
-    let first = Number(styled.slice(0, precision + 1).replace(',', '.'));
+    let first = '$' + Number(styled.slice(0, precision + 1).replace(',', '.'));
     let commas = (styled.match(/,/g) || []).length;
-    if (commas === 4) return '$' + first + 'T';
-    else if (commas === 3) return '$' + first + 'B';
-    else if (commas === 2) return '$' + first + 'M';
-    else if (commas === 1) return '$' + first + 'K';
+    if (commas === 4) return first + 'T';
+    else if (commas === 3) return first + 'B';
+    else if (commas === 2) return first + 'M';
+    else if (commas === 1) return first + 'K';
     else return '$' + styled;
 }
 

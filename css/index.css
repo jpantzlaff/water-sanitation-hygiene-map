@@ -16,13 +16,36 @@ body {
     display: none;
 }
 .leaflet-tooltip p {
-    font-size: 1.1em;
     text-align: center;
     margin: 0;
 }
+.leaflet-tooltip > :nth-child(1) {
+    font-size: 130%;
+}
+.leaflet-tooltip > :nth-child(2) {
+    font-size: 100%;
+    color: #eee;
+}
+.leaflet-tooltip > :nth-child(3) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    font-size: 100%;
+    color: #eee;
+}
+.leaflet-tooltip > div > :nth-child(1) {
+    line-height: 1.3em;
+    font-size: 150%;
+}
+.leaflet-tooltip > div > :nth-child(2) {
+    margin: 0 0.5em;
+    color: #ddd;
+    font-size: 90%;
+}
 #panel {
     padding: 1em;
-    flex-basis: 500px;
+    flex-basis: 50%;
     max-width: 50%;
     overflow-y: auto;
 }
@@ -41,8 +64,8 @@ body {
     border-radius: 3px;
     cursor: pointer;
 }
-.chart-tile:hover, .chart-title.active {
-    background-color: #555;
+.chart-tile.active {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 .chart {
     display: flex;
