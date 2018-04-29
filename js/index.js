@@ -154,7 +154,9 @@ $.get({
                 .style('background-color', d => themes[theme].scale(d.properties[theme]))
                 /* Set the height of each bar using its value, scaled between 0 and 100 */
                 .style('height', d => themes[theme].height(d.properties[theme]) + 'px')
-                .on('click', makeActiveD3);
+                .on('click', makeActiveD3)
+                .on('mouseover', makeActiveD3)
+                .on('mouseout', makeActiveD3);
         });
         regionData = topojson.feature(d, d.objects.regions);
         
