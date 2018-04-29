@@ -259,13 +259,6 @@
 	background: rgba(255,255,255,0.5);
 	}
 
-
-/* general typography */
-.leaflet-container {
-	font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
-	}
-
-
 /* general toolbar styles */
 
 .leaflet-bar {

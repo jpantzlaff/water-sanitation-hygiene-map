@@ -256,16 +256,24 @@ function makeActiveD3(d) {
     let event = d3.event;
     makeActive('country', d.properties, event.type);
     let p = themes[currentMode];
-    $('.leaflet-tooltip-pane').html(`
-        <div class="leaflet-tooltip chart-tooltip">
-            <p>${d.properties.name}</p>
-            <p>${p.title}</p>
-            <div style="display:flex">
-                <p>${formatStat(d.properties[currentMode], currentMode)}</p>
-                <p>${p.stat}</p>
-            </div>
-        </div>
-    `);
+    if (event.type === 'mouseover') {
+        $('#chart-tooltip')
+            .html(`
+                <div class="leaflet-tooltip">
+                    <p>${d.properties.name}</p>
+                    <p>${p.title}</p>
+                    <div style="display:flex">
+                        <p>${formatStat(d.properties[currentMode], currentMode)}</p>
+                        <p>${p.stat}</p>
+                    </div>
+                </div>
+            `)
+            .css('visibility', 'visible')
+            .css('top', (event.pageY - 30) + 'px')
+            .css('left', (event.pageX + 10) + 'px');
+    } else if (event.type === 'mouseout') {
+        $('#chart-tooltip').css('visibility', 'hidden');
+    }
 }
 
 let activeFeature = null;

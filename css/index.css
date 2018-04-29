@@ -13,7 +13,13 @@ body {
     visibility: hidden;
     display: flex;
 }
+#chart-tooltip {
+    position: absolute;
+    visibility: hidden;
+    z-index: 500;
+}
 .leaflet-tooltip {
+    pointer-events: none;
     background-color: #303030 !important;
     color: white;
 }
@@ -21,11 +27,8 @@ body {
     text-align: center;
     margin: 0;
 }
-.leaflet-tooltip > :nth-child(1) {
-    font-size: 130%;
-}
 .leaflet-tooltip > :nth-child(2) {
-    font-size: 100%;
+    font-size: 80%;
     color: #eee;
 }
 .leaflet-tooltip > :nth-child(3) {
@@ -33,17 +36,15 @@ body {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    font-size: 100%;
-    color: #eee;
 }
 .leaflet-tooltip > div > :nth-child(1) {
     line-height: 1.3em;
-    font-size: 150%;
+    font-size: 110%;
 }
 .leaflet-tooltip > div > :nth-child(2) {
     margin: 0 0.5em;
     color: #ddd;
-    font-size: 90%;
+    font-size: 80%;
 }
 #credits h6 {
     font-size: 1.1em;
