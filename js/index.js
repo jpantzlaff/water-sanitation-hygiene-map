@@ -114,8 +114,8 @@ $.get({
             `);
             let values = [];
             countryData.features.forEach(i => values.push(i.properties[theme]));
-            v.min = Math.min.apply(null, values);
-            v.max = Math.max.apply(null, values);
+            v.min = Math.min(...values);
+            v.max = Math.max(...values);
             v.scale = d3.scaleLinear()
                 .domain([v.min, v.max])
                 .range(v.colors);
@@ -124,7 +124,7 @@ $.get({
                 .range([0.75, 0.6]);
             v.height = d3.scaleLinear()
                 .domain([v.min, v.max])
-                .range([0, 100]);
+                .range([2, 100]);
             
             $('#charts').append(`
                 <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
@@ -144,6 +144,7 @@ $.get({
                 .data(countryData.features)
                 /* Recurse through the object */
                 .enter()
+                .filter(d => d.properties[theme] !== null)
                 /* Append a div for each bar */
                 .append('div')
                 /* Sort the bars by value */
