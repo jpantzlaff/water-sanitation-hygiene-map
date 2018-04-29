@@ -117,13 +117,12 @@ body {
 }
 #context p {
     display: inline;
-}
-#context p:nth-child(1) {
     font-variant: small-caps;
     color: #bfbfbf;
     font-size: 95%;
 }
-#context p:nth-child(2) {
+#context p:last-child {
+    font-variant: none;
     margin-left: 0.2em;
     color: #d9d9d9;
 }

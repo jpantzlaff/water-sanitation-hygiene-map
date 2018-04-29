@@ -33,16 +33,20 @@ let themes = {
 
 let contextStats = {
     region: {
-        title: 'Region'
+        title: 'Region',
+        regional: false
     },
     gdp: {
-        title: 'Gross Domestic Product'
+        title: 'Gross Domestic Product',
+        regional: 'sum'
     },
     gni: {
-        title: 'Gross National Income'
+        title: 'Gross National Income',
+        regional: 'mean'
     },
     fsi: {
-        title: 'Fragile States Index'
+        title: 'Fragile States Index',
+        regional: 'mean'
     }
 };
 
@@ -91,8 +95,9 @@ $.get({
         countryData = topojson.feature(d, d.objects.countries);
         $.each(contextStats, function(stat, v) {
             $('#context').append(`
-                <div>
+                <div class="${(!!v.regional ? 'region country stat' : 'country stat')}">
                     <p>${v.title}</p>
+                    <p class="${(!!v.regional ? 'region stat' : 'stat')}">(${v.regional})</p>
                     <p id="${stat}-stat"></p>
                 </div>
             `);
@@ -245,12 +250,15 @@ function makeActive(type, prop, event) {
     });
     active.addTo(map);
     $('#info-title').html(prop.name);
+    $('.stat').hide();
+    $('.stat.' + type).show();
     if (type === 'country') {
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
         $.each(contextStats, stat => {
             if (stat === 'region' || stat === 'fsi') $(`#${stat}-stat`).html(prop[stat]);
             else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
         });
+    } else if (type === 'region') {
     }
     if (event === 'click') {
         activeFeature = {
