@@ -103,7 +103,7 @@ $.get({
             `);
         });
         $.each(themes, function(theme, v) {
-            $('#stats').append(`
+            $('#country-stats').append(`
                 <div>
                     <p>${v.title}</p>
                     <p id="${theme}-stat"></p>
@@ -156,6 +156,7 @@ $.get({
         });
         regionData = topojson.feature(d, d.objects.regions);
         drawCountries('drinking');
+        $('body').css('visibility', 'visible');
     }
 });
 
@@ -259,6 +260,7 @@ function makeActive(type, prop, event) {
             else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
         });
     } else if (type === 'region') {
+        
     }
     if (event === 'click') {
         activeFeature = {
