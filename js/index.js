@@ -253,7 +253,7 @@ function formatStat(stat, theme) {
 
 function formatCurrency(v, precision) {
     if (v === null) return 'Unknown';
-    let styled = v.toLocaleString('en-US');
+    let styled = Math.round(v).toLocaleString('en-US');
     let first = '$' + Number(styled.slice(0, precision + 1).replace(',', '.'));
     let commas = (styled.match(/,/g) || []).length;
     if (commas === 4) return first + 'T';
