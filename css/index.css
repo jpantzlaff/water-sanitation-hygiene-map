@@ -79,6 +79,20 @@ body {
     border-radius: 3px;
     cursor: pointer;
 }
+.chart-labels {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.chart-labels p {
+    margin: 0;
+}
+.chart-labels :nth-child(2n+1) {
+    font-size: 90%;
+}
+.chart-labels :nth-child(2) {
+    font-size: 85%;
+}
 .chart-tile.active, .chart-tile:hover {
     background-color: rgba(255, 255, 255, 0.15);
     transition: background-color 0.4s;
@@ -88,7 +102,7 @@ body {
     flex-direction: row;
     min-height: 100px;
     align-items: flex-end;
-    margin-bottom: 1em;
+    margin-bottom: 0.3em;
 }
 .chart-title {
     margin: 0;

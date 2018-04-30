@@ -128,6 +128,11 @@ $.get({
             
             $('#charts').append(`
                 <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
+                    <div class="chart-labels">
+                        <p>${formatStat(v.min, theme)}</p>
+                        <p>${v.stat}</p>
+                        <p>${formatStat(v.max, theme)}</p>
+                    </div>
                     <p class="chart-title">${themes[theme].title}</p>
                 </div>
             `);
@@ -315,7 +320,10 @@ function makeActive(type, prop, event) {
         $('.' + prop.abbr).removeClass('inactive');
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
     } else if (type === 'region') {
-        prop.countries.forEach(abbr => $('.' + abbr).removeClass('inactive'));
+        prop.countries.forEach(abbr => {
+            $('.' + abbr).removeClass('inactive');
+            $('#region-stats').html(abbr);
+        });
     }
     $.each(contextStats, stat => {
         if (stat === 'region') $(`#${stat}-stat`).html(prop[stat]);
