@@ -75,7 +75,7 @@ body {
 .chart-tile {
     margin: 1em 0;
     border: #666 solid 1.3px;
-    padding: 10px 8px;
+    padding: 8px;
     border-radius: 3px;
     cursor: pointer;
 }
@@ -88,6 +88,8 @@ body {
     margin: 0;
 }
 .chart-labels :nth-child(2n+1) {
+    text-align: center;
+    flex-basis: 3em;
     font-size: 90%;
 }
 .chart-labels :nth-child(2) {
@@ -95,7 +97,7 @@ body {
 }
 .chart-tile.active, .chart-tile:hover {
     background-color: rgba(255, 255, 255, 0.15);
-    transition: background-color 0.4s;
+    transition: background-color 0.6s;
 }
 .chart {
     display: flex;
@@ -106,7 +108,6 @@ body {
 }
 .chart-title {
     margin: 0;
-    text-align: center;
 }
 .bar {
     flex: 1;
@@ -121,7 +122,7 @@ body {
     width: 2px;
 }
 .bar.inactive {
-    opacity: 0.6;
+    opacity: 0.5;
 }
 #map_info {
     display: flex;

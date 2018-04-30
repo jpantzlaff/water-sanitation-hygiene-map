@@ -3,30 +3,35 @@ let themes = {
         title: 'Basic and safely managed drinking water services',
         suffix: '%',
         stat: 'of population has access',
+        chartStat: 'Population with access',
         colors: ['#0cf', '#ccc'],
     },
     sanitation: {
         title: 'Basic and safely managed sanitation services',
         suffix: '%',
         stat: 'of population has access',
+        chartStat: 'Population with access',
         colors: ['#2c7', '#ccc']
     },
     handwashing: {
         title: 'Handwashing with soap',
         suffix: '%',
         stat: 'of population practices',
+        chartStat: 'Practicing population',
         colors: ['#07f', '#ccc']
     },
     defecation: {
         title: 'Open defecation',
         suffix: '%',
         stat: 'of population practices',
+        chartStat: 'Practicing population',
         colors: ['#ccc', '#f50']
     },
     mortality: {
         title: 'Mortality attributed to unsafe WASH services',
         suffix: '',
         stat: 'deaths per 100,000 people',
+        chartStat: 'Deaths per 100,000 people',
         colors: ['#ccc', '#fd0']
     }
 };
@@ -128,18 +133,18 @@ $.get({
             
             $('#charts').append(`
                 <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
+                    <p class="chart-title">${themes[theme].title}</p>
                     <div class="chart-labels">
                         <p>${formatStat(v.min, theme)}</p>
-                        <p>${v.stat}</p>
+                        <p>${v.chartStat}</p>
                         <p>${formatStat(v.max, theme)}</p>
                     </div>
-                    <p class="chart-title">${themes[theme].title}</p>
                 </div>
             `);
             
             let chart = d3.select(`#${theme}-chart`)
                 /* Append a div element to hold bars */
-                .insert('div', ':first-child')
+                .insert('div', ':nth-child(2)')
                 /* Make the element part of the "chart" class */
                 .attr('class', 'chart');
 
