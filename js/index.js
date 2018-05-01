@@ -65,7 +65,7 @@ let map = L.map('map', {
     minZoom: 3,
     maxZoom: 6,
     /* Limit panning to the area of interest */
-    maxBounds: [[-35, -30], [56, 155]],
+    maxBounds: [[-38, -30], [56, 155]],
     maxBoundsViscosity: 0.9,
     /* Remove zoom buttons */
     zoomControl: false,
@@ -73,7 +73,7 @@ let map = L.map('map', {
     attributionControl: false
 });
 /* Set the map's initial extent to the area of interest */
-map.fitBounds([[-35, -30], [56, 155]]);
+map.fitBounds([[-38, -30], [56, 155]]);
 
 /* Create the basemap and add to map */
 L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
@@ -122,6 +122,7 @@ $.get({
             $('#region-stats').append(`
                 <div>
                     <p>${v.title}</p>
+                    <p>${v.chartStat}</p>
                     <div id="${theme}-list"></div>
                 </div>
             `);
@@ -181,9 +182,7 @@ $.get({
         
         for (i = 0; i < regionData.features.length; i++) {
             let rProp = regionData.features[i].properties;
-            
-            $.each(themes, (i, v) => v[rProp.name] = {});
-            
+            $.each(themes, (i, v) => v[rProp.name] = []);
             ['gdp', 'gni', 'fsi', 'countries'].forEach(p => rProp[p] = []);
             countryData.features.forEach(c => {
                 let cProp = c.properties;
@@ -191,12 +190,13 @@ $.get({
                     rProp.gdp.push(cProp.gdp);
                     rProp.gni.push(cProp.gni);
                     rProp.fsi.push(cProp.fsi);
-                    rProp.countries.push(cProp.abbr);
-                             
-                    $.each(themes, (i, v) => {
-                        themes[i][rProp.name][cProp.name] = cProp[i];
-                    });
+                    rProp.countries.push(cProp.abbr);       
+                    $.each(themes, i => themes[i][rProp.name].push([cProp.name, cProp[i]]));
                 }
+            });
+            $.each(themes, (theme, v) => {
+                if (theme === 'defecation' || theme === 'mortality') v[rProp.name] = sortInArray(v[rProp.name], true);
+                else v[rProp.name] = sortInArray(v[rProp.name], false);
             });
             rProp.gdp = arrayStat(rProp.gdp, 'sum');
             rProp.gni = arrayStat(rProp.gni, 'mean');
@@ -206,6 +206,26 @@ $.get({
         $('body').css('visibility', 'visible');
     }
 });
+
+function sortInArray(arr, invert) {
+    let iLength = arr.length;
+    let arrReturn = [];
+    let keys = [];
+    let values = [];
+    arr.forEach(i => {
+        keys.push(i[0]);
+        values.push(i[1]);
+    });
+    let valuesCopy = [...values];
+    let sorted = valuesCopy.sort(invert ? (a, b) => b - a : (a, b) => a - b);
+    sorted.forEach(i => {
+        let index = values.indexOf(i);
+        arrReturn.push([keys[index], values[index]]);
+        keys.splice(index, 1);
+        values.splice(index, 1);
+    });
+    return arrReturn;
+}
 
 function arrayStat(array, stat) {
     let sum = 0;
@@ -343,9 +363,9 @@ function makeActive(type, prop, event) {
             $(`#${theme}-list`).html(null);
             $.each(themes[theme][prop.name], (i, v) => {
                 $(`#${theme}-list`).append(`
-                    <div class="region-list-entry">
-                        <p onclick="makeActive('country', '${i}', 'click')">${i}</p>
-                        <p>${formatStat(v, theme).replace('Unknown', '&mdash;').replace(' %', '')}</p>
+                    <div class="region-list-entry" onclick="makeActive('country', '${v[0]}', 'click')">
+                        <p>${v[0]}</p>
+                        <p>${formatStat(v[1], theme).replace('Unknown', '&mdash;').replace(' %', '')}</p>
                     </div>
                 `);
             });
