@@ -310,7 +310,6 @@ function getRegionProp(name) {
 
 function makeActive(type, prop, event) {
     if (type === 'region') prop = getRegionProp(prop);
-    console.log(prop);
     if (event === 'mouseout') {
         if (!!activeFeature) {
             type = activeFeature.type;
