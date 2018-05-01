@@ -55,6 +55,8 @@ let contextStats = {
     }
 };
 
+let activeFeature = null;
+
 /* Create a Leaflet map in the "map" div */
 let map = L.map('map', {
     /* Render with Canvas rather than the default SVG */
@@ -300,16 +302,14 @@ function makeActiveD3(d) {
     }
 }
 
-let activeFeature = null;
-
-function getRegionProp(name) {
-    for (i = 0; i < regionData.features.length; i++) {
-        if (regionData.features[i].properties.name === name) return regionData.features[i].properties;
+function getProp(name, type) {
+    for (i = 0; i < window[type + 'Data'].features.length; i++) {
+        if (window[type + 'Data'].features[i].properties.name === name) return window[type + 'Data'].features[i].properties;
     }
 }
 
 function makeActive(type, prop, event) {
-    if (type === 'region') prop = getRegionProp(prop);
+    if (typeof prop === 'string') prop = getProp(prop, type);
     if (event === 'mouseout') {
         if (!!activeFeature) {
             type = activeFeature.type;
@@ -344,8 +344,8 @@ function makeActive(type, prop, event) {
             $.each(themes[theme][prop.name], (i, v) => {
                 $(`#${theme}-list`).append(`
                     <div class="region-list-entry">
-                        <p>${i}</p>
-                        <p>${formatStat(v, theme).replace('Unknown %', '-')}</p>
+                        <p onclick="makeActive('country', '${i}', 'click')">${i}</p>
+                        <p>${formatStat(v, theme).replace('Unknown', '&mdash;').replace(' %', '')}</p>
                     </div>
                 `);
             });
@@ -357,12 +357,13 @@ function makeActive(type, prop, event) {
         else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
     });
     if (event === 'click') {
+        $('#info').show();
+        map.invalidateSize();
         activeFeature = {
             type: type,
             prop: prop
         };
         map.fitBounds(active.getBounds());
-        $('#info').show();
     }
     map.invalidateSize();
 }
