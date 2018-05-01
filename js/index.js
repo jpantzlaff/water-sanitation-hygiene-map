@@ -117,6 +117,12 @@ $.get({
                     <p>${v.stat}</p>
                 </div>
             `);
+            $('#region-stats').append(`
+                <div>
+                    <p>${v.title}</p>
+                    <div id="${theme}-list"></div>
+                </div>
+            `);
             let values = [];
             countryData.features.forEach(i => values.push(i.properties[theme]));
             v.min = Math.min(...values);
@@ -173,6 +179,9 @@ $.get({
         
         for (i = 0; i < regionData.features.length; i++) {
             let rProp = regionData.features[i].properties;
+            
+            $.each(themes, (i, v) => v[rProp.name] = {});
+            
             ['gdp', 'gni', 'fsi', 'countries'].forEach(p => rProp[p] = []);
             countryData.features.forEach(c => {
                 let cProp = c.properties;
@@ -181,6 +190,10 @@ $.get({
                     rProp.gni.push(cProp.gni);
                     rProp.fsi.push(cProp.fsi);
                     rProp.countries.push(cProp.abbr);
+                             
+                    $.each(themes, (i, v) => {
+                        themes[i][rProp.name][cProp.name] = cProp[i];
+                    });
                 }
             });
             rProp.gdp = arrayStat(rProp.gdp, 'sum');
@@ -297,6 +310,7 @@ function getRegionProp(name) {
 
 function makeActive(type, prop, event) {
     if (type === 'region') prop = getRegionProp(prop);
+    console.log(prop);
     if (event === 'mouseout') {
         if (!!activeFeature) {
             type = activeFeature.type;
@@ -325,9 +339,17 @@ function makeActive(type, prop, event) {
         $('.' + prop.abbr).removeClass('inactive');
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
     } else if (type === 'region') {
-        prop.countries.forEach(abbr => {
-            $('.' + abbr).removeClass('inactive');
-            $('#region-stats').html(abbr);
+        prop.countries.forEach(abbr => $('.' + abbr).removeClass('inactive'));
+        $.each(themes, theme => {
+            $(`#${theme}-list`).html(null);
+            $.each(themes[theme][prop.name], (i, v) => {
+                $(`#${theme}-list`).append(`
+                    <div class="region-list-entry">
+                        <p>${i}</p>
+                        <p>${formatStat(v, theme).replace('Unknown %', '-')}</p>
+                    </div>
+                `);
+            });
         });
     }
     $.each(contextStats, stat => {
