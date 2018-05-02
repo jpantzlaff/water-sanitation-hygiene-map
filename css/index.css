@@ -80,6 +80,9 @@ body {
     border-radius: 3px;
     cursor: pointer;
 }
+.chart-tile:last-child {
+    margin-bottom: 0;
+}
 .chart-labels {
     display: flex;
     align-items: center;
