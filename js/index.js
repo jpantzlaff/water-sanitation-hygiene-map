@@ -1,3 +1,4 @@
+/* List of possible themes (display modes), including text and color ramps to display */
 let themes = {
     drinking: {
         title: 'Basic and safely managed drinking water services',
@@ -36,17 +37,21 @@ let themes = {
     }
 };
 
+/* List of statistics provided for context in the info box (bottom panel) */
 let contextStats = {
     region: {
         title: 'Region',
+        /* This statistic should not be displayed at all when a region is the active feature */
         regional: false
     },
     gdp: {
         title: 'Gross Domestic Product',
+        /* When the active feature is a region, a sum of all of the values of its constituent countries should be displayed */
         regional: 'sum'
     },
     gni: {
         title: 'Gross National Income',
+        /* When the active feature is a region, the mean of all of the values of its constituent countries should be displayed */
         regional: 'mean'
     },
     fsi: {
@@ -55,6 +60,7 @@ let contextStats = {
     }
 };
 
+/* Initialize the application with no feature being active */
 let activeFeature = null;
 
 /* Create a Leaflet map in the "map" div */
@@ -69,40 +75,52 @@ let map = L.map('map', {
     maxBoundsViscosity: 0.9,
     /* Remove zoom buttons */
     zoomControl: false,
-    /* Remove attribution control, as one has been made separately */
+    /* Remove default attribution control, as one has been made separately */
     attributionControl: false
 });
 /* Set the map's initial extent to the area of interest */
 map.fitBounds([[-38, -30], [56, 155]]);
 
-/* Create the basemap and add to map */
+/* Create the basemap layer and add to map */
 L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
 	subdomains: 'abcd'
 }).addTo(map);
 
+/* Create a map pane to hold labels, as these should display above everything else on the map */
 map.createPane('labels');
+/* Set a z-index that will achieve the intended result: above everything but the tooltip */
 map.getPane('labels').style.zIndex = 450;
+/* Don't capture any pointer events in this labels pane, allowing pointer interactions to make it "down" to the country features */
 map.getPane('labels').style.pointerEvents = 'none';
 
+/* Create the labels layer and add to the map - specifically, the labels pane */
 L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
 	subdomains: 'abcd',
     pane: 'labels'
 }).addTo(map);
 
+/* Create an attribution control containing all of the attribution for the various data sources and add to the map */
 L.control.attribution({
     position: 'bottomright',
     prefix: `<a href="http://leafletjs.com">Leaflet</a> | Basemap: &copy;&nbsp;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy;&nbsp;<a href="https://carto.com/attribution/">CARTO</a> | Countries: <a href="http://www.naturalearthdata.com/">Natural Earth</a> | Economic Indicators: <a href="http://www.worldbank.org/">The World Bank</a> | Fragile States Index: <a href="http://global.fundforpeace.org/index.php">Fund for Peace</a> | WASH Data: <a href="http://www.who.int/">World Health Organization</a> | <a href="#" onclick="$('#credits').show()">Full Credits</a>`
 }).addTo(map);
 
+/* Create empty GeoJSON-based layers to store the country features and the active feature */
 let countries = L.geoJSON();
 let active = L.geoJSON();
 
+/* Request the TopoJSON data containing the country and region features via AJAX */
 $.get({
     url: 'data/combined.topojson',
+    /* Expect JSON in response */
     dataType: 'json',
+    /* When the response is received: */
     success: function(d) {
+        /* Assign the countries portion of the TopoJSON to a global variable */
         countryData = topojson.feature(d, d.objects.countries);
+        /* For each contextual statistic: */
         $.each(contextStats, function(stat, v) {
+            /* Add elements to the document that are ready to display the contextual information; elements in the "region" class display only when a region is the active feature, while those in "country" only appear when a country is active */
             $('#context').append(`
                 <div class="${(!!v.regional ? 'region country stat' : 'country stat')}">
                     <p>${v.title}</p>
@@ -111,7 +129,9 @@ $.get({
                 </div>
             `);
         });
+        /* For each theme: */
         $.each(themes, function(theme, v) {
+            /* Repeat much of the same as line 124, creating places in the document to display the information as it's requested */
             $('#country-stats').append(`
                 <div>
                     <p>${v.title}</p>
@@ -126,20 +146,29 @@ $.get({
                     <div id="${theme}-list"></div>
                 </div>
             `);
+            /* SCALE CREATION */
+            /* Create an empty array to hold of the attribute values for this theme */
             let values = [];
+            /* Push the values into the array */
             countryData.features.forEach(i => values.push(i.properties[theme]));
+            /* Calculate the minimum value present */
             v.min = Math.min(...values);
+            /* Calculate the maximum value present */
             v.max = Math.max(...values);
+            /* Using the min/max values and this theme's color ramp, create a scale that's used to color the charts and country features */
             v.scale = d3.scaleLinear()
                 .domain([v.min, v.max])
                 .range(v.colors);
+            /* Do the same for opacity - more saturated colors will be made more opaque to accentuate areas in need */
             v.opacity = d3.scaleLinear()
                 .domain([v.min, v.max])
-                .range([0.75, 0.6]);
+                .range([0.75, 0.75]);
+            /* Create another scale to determine the height of the bars in the chart */
             v.height = d3.scaleLinear()
                 .domain([v.min, v.max])
                 .range([2, 100]);
             
+            /* Append an empty chart to the side panel, along with the relevant title, min/max values, and X-axis label */
             $('#charts').append(`
                 <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
                     <p class="chart-title">${themes[theme].title}</p>
@@ -177,6 +206,7 @@ $.get({
                 .on('mouseover', makeActiveD3)
                 .on('mouseout', makeActiveD3);
         });
+        /* Assign the regions portion of the TopoJSON to a global variable */
         regionData = topojson.feature(d, d.objects.regions);
         
         for (i = 0; i < regionData.features.length; i++) {
