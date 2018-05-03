@@ -143,6 +143,9 @@ $.get({
             $('#charts').append(`
                 <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
                     <p class="chart-title">${themes[theme].title}</p>
+                    <div class="chart-parent">
+                        <div class="chart"></div>
+                    </div>
                     <div class="chart-labels">
                         <p>${formatStat(v.min, theme)}</p>
                         <p>${v.chartStat}</p>
@@ -151,11 +154,7 @@ $.get({
                 </div>
             `);
             
-            let chart = d3.select(`#${theme}-chart`)
-                /* Append a div element to hold bars */
-                .insert('div', ':nth-child(2)')
-                /* Make the element part of the "chart" class */
-                .attr('class', 'chart');
+            let chart = d3.select(`#${theme}-chart .chart`);
 
             /* Make a selection to begin inserting bars */
             let bars = chart.selectAll('.bars')
@@ -173,7 +172,7 @@ $.get({
                 /* Set the fill color using the same scales as the map */
                 .style('background-color', d => themes[theme].scale(d.properties[theme]))
                 /* Set the height of each bar using its value, scaled between 0 and 100 */
-                .style('height', d => themes[theme].height(d.properties[theme]) + 'px')
+                .style('height', d => themes[theme].height(d.properties[theme]) + '%')
                 .on('click', makeActiveD3)
                 .on('mouseover', makeActiveD3)
                 .on('mouseout', makeActiveD3);
