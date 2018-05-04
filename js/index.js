@@ -50,7 +50,7 @@ let contextStats = {
         regional: 'sum'
     },
     gni: {
-        title: 'Gross National Income',
+        title: 'Gross National Income per Capita',
         /* When the active feature is a region, the mean of all of the values of its constituent countries should be displayed */
         regional: 'mean'
     },
