@@ -209,80 +209,126 @@ $.get({
         /* Assign the regions portion of the TopoJSON to a global variable */
         regionData = topojson.feature(d, d.objects.regions);
         
+        /* For each region: */
         for (i = 0; i < regionData.features.length; i++) {
+          /* Get the properties of the region  */
             let rProp = regionData.features[i].properties;
+            /* For each theme, add an object to the themes object to store this region's statistic */
             $.each(themes, (i, v) => v[rProp.name] = []);
+            /* For each statistic in the regional info box, add an array to the region's object to store data values */
             ['gdp', 'gni', 'fsi', 'countries'].forEach(p => rProp[p] = []);
+            /* For each country: */
             countryData.features.forEach(c => {
+                /* Get the country's properties */
                 let cProp = c.properties;
+                /* If the current country is in the current region: */
                 if (cProp.region === rProp.name) {
+                    /* Add this country's GDP, GNI, FSI, and name to this region's statistic arrays (made at line 219) */
                     rProp.gdp.push(cProp.gdp);
                     rProp.gni.push(cProp.gni);
                     rProp.fsi.push(cProp.fsi);
-                    rProp.countries.push(cProp.abbr);       
+                    rProp.countries.push(cProp.abbr);
+                    /* For each theme, add this country's statistics to this theme's array in this region's object (made at line 217) */
                     $.each(themes, i => themes[i][rProp.name].push([cProp.name, cProp[i]]));
                 }
             });
+            /* For each theme: */
             $.each(themes, (theme, v) => {
+                /* If the current theme is defecation or mortality, sort this theme's array in place (descending) */
                 if (theme === 'defecation' || theme === 'mortality') v[rProp.name] = sortInArray(v[rProp.name], true);
+                /* Otherwise, sort this theme's array in place (ascending) */
                 else v[rProp.name] = sortInArray(v[rProp.name], false);
             });
+            /* Calculate this region's sum of GDPs, mean of GNIs, and mean of FSIs */
             rProp.gdp = arrayStat(rProp.gdp, 'sum');
             rProp.gni = arrayStat(rProp.gni, 'mean');
             rProp.fsi = arrayStat(rProp.fsi, 'mean');
         }
+        /* Add the country features to the map using the "drinking" theme */
         drawCountries('drinking');
+        /* Initialization is complete, so make the body's content visible */
         $('body').css('visibility', 'visible');
     }
 });
 
+/* Function sorting arrays by values in nested arrays (e.g. [[key1,value1],[key2,value2]]) */
 function sortInArray(arr, invert) {
+    /* Get the length of the input array */
     let iLength = arr.length;
+    /* Create empty arrays to store the output array, "keys" in the input array, and "values" in the input array */
     let arrReturn = [];
     let keys = [];
     let values = [];
+    /* For each element (nested array) in the input array, copy the "key" and "value" to their respective arrays */
     arr.forEach(i => {
         keys.push(i[0]);
         values.push(i[1]);
     });
+    /* Make a deep copy of the values array */
     let valuesCopy = [...values];
+    /* Sort the copy of the values array in ascending or descending fashion, depending on the value of "invert" variable */
     let sorted = valuesCopy.sort(invert ? (a, b) => b - a : (a, b) => a - b);
+    /* For each value in the sorted array: */
     sorted.forEach(i => {
+        /* Get the index of this value in the input values */
         let index = values.indexOf(i);
+        /* Add the "key" and "value" corresponding to this index to the output array */
         arrReturn.push([keys[index], values[index]]);
+        /* Delete the "key" and "value" from their respective arrays */
         keys.splice(index, 1);
         values.splice(index, 1);
     });
+    /* Return the output array */
     return arrReturn;
 }
 
+/* Function calculating a statistic for all of the values in an array */
 function arrayStat(array, stat) {
+    /* Initially set the sum of all values to zero */
     let sum = 0;
+    /* For each value in the input array, add this amount to the sum */
     array.forEach(v => sum += v);
+    /* If the desired statistic is the sum, return the sum */
     if (stat === 'sum') return sum;
+    /* If the desired statistic is the mean, return the sum divided by the number of input values */
     else if (stat === 'mean') return sum / array.length;
 }
 
+/* Function adding the country features to the map */
 function drawCountries(mode, event='click') {
+    /* Store the selected display mode as the current display mode (this is to support hovering) */
     currentMode = mode;
+    /* If the event that triggered this function was a click, store the selected display mode as the active display mode */
     if (event === 'click') activeMode = mode;
+    /* If the event was a mouseout (end of hover), revert the mode back to the one selected by a click */
     else if (event === 'mouseout') mode = activeMode;
+    /* For all chart tiles (rectangles bounding the charts), remove the "active" class (the class that causes a lighter background) */
     $('.chart-tile').removeClass('active');
+    /* Add the "active" class to this display mode's chart tile */
     $(`#${mode}-chart`).addClass('active');
+    /* Remove all country features from the map so they can be redrawn with the new colors */
     countries.clearLayers();
+    /* Reset the countries layer, reloading the country data */
     countries = L.geoJSON(countryData, {
-        /* For each feature in the GeoJSON: */
+        /* For each feature in the layer, set the style: */
         style: function(feature) {
+            /* Get the feature's properties */
             let p = feature.properties;
             return {
+                /* If the feature's statistic for this theme is not null, use this theme's color ramp to determine the color; otherwise, use white */
                 fillColor: (p[mode] !== null ? themes[mode].scale(p[mode]) : 'white'),
+                /* Use this theme's opacity ramp to determine opacity */
                 fillOpacity: themes[mode].opacity(p[mode]),
+                /* Make the feature outlines black and very narrow */
                 color: '#000',
                 weight: 0.2
             };
         },
+        /* For each feature in the layer, bind tooltips and event listeners: */
         onEachFeature: function(feature, layer) {
+            /* Get the feature's properties */
             let p = feature.properties;
+            /* When the feature is clicked on, hovered over, or no longer hovered over, call makeActive() with the feature's properties and the event's name */
             layer
                 .on('click', function() {
                     makeActive('country', p, 'click');
@@ -293,6 +339,7 @@ function drawCountries(mode, event='click') {
                 .on('mouseout', function() {
                     makeActive('country', p, 'mouseout');
                 })
+                /* Bind a tooltip to the feature containing the country name, statistic name, statistic, and statistic description */
                 .bindTooltip(`
                     <p>${p.name}</p>
                     <p>${themes[mode].title}</p>
@@ -301,6 +348,7 @@ function drawCountries(mode, event='click') {
                         <p>${themes[mode].stat}</p>
                     </div>
                 `, {
+                    /* Make the tooltip follow the pointing cursor */
                     sticky: true
                 });
         }
@@ -309,29 +357,49 @@ function drawCountries(mode, event='click') {
     countries.addTo(map);
 }
 
+/* Function properly formatting a statistic for a given theme */
 function formatStat(stat, theme) {
+    /* If the statistic has a null value, return "Unknown" text */
     if (stat === null) return 'Unknown ' + themes[theme].suffix;
+    /* If the theme is mortality, round the statistic to one decimal point */
     else if (theme === 'mortality') return stat.toFixed(1);
+    /* Otherwise, return the statistic with this theme's suffix */
     else return stat + themes[theme].suffix;
 }
 
+/* Function formatting integer currency values into a newspaper-style value */
 function formatCurrency(v, precision) {
+    /* If the input value is null, return "Unknown" text */
     if (v === null) return 'Unknown';
+    /* Get the locale-formatted input value (i.e. add commas for digit grouping) */
     let styled = Math.round(v).toLocaleString('en-US');
+    /* Get the first several characters of the locale-formatted value, replacing the comma with a decimal point and prepending a dollar sign */
     let first = '$' + Number(styled.slice(0, precision + 1).replace(',', '.'));
+    /* Count the number of commas in the locale-formatted value */
     let commas = (styled.match(/,/g) || []).length;
+    /* If the number of commas is 4 (the number is in the trillions), append a "T" to the output */
     if (commas === 4) return first + 'T';
+    /* For billions, add "B" */
     else if (commas === 3) return first + 'B';
+    /* For millions, add "M" */
     else if (commas === 2) return first + 'M';
+    /* For thousands, add "K" */
     else if (commas === 1) return first + 'K';
+    /* Otherwise, just return the straight-up value without any abbreviation */
     else return '$' + styled;
 }
 
+/* Function handling pointer events on chart bars */
 function makeActiveD3(d) {
+    /* Get the pointer event */
     let event = d3.event;
+    /* Call makeActive() with this country's properties and this pointer event */
     makeActive('country', d.properties, event.type);
+    /* Get the current theme's properties */
     let p = themes[currentMode];
+    /* If a hover triggered this function: */
     if (event.type === 'mouseover') {
+        /* Set the chart tooltip's content to contain the country name, statistic name, statistic, and statistic description */
         $('#chart-tooltip')
             .html(`
                 <div class="leaflet-tooltip">
@@ -343,54 +411,82 @@ function makeActiveD3(d) {
                     </div>
                 </div>
             `)
+            /* Make the tooltip visible and position it to be near the cursor */
             .css('visibility', 'visible')
             .css('top', (event.pageY - 30) + 'px')
             .css('left', (event.pageX + 10) + 'px');
-    } else if (event.type === 'mouseout') {
-        $('#chart-tooltip').css('visibility', 'hidden');
-    }
+    /* If the end of a hover triggered this function, hide the tooltip: */
+    } else if (event.type === 'mouseout') $('#chart-tooltip').css('visibility', 'hidden');
 }
 
+/* Function getting all properties for a region or country if only its name is provided */
 function getProp(name, type) {
+    /* For each feature in the data in question ("region" or "country"): */
     for (i = 0; i < window[type + 'Data'].features.length; i++) {
+        /* If the provided region/country name matches the name of this feature, return this feature's properties */
         if (window[type + 'Data'].features[i].properties.name === name) return window[type + 'Data'].features[i].properties;
     }
 }
 
+/* Function making a feature active (i.e. drawing a thick outline around it, showing its statistics in the info box, and coloring the charts appropriately) */
 function makeActive(type, prop, event) {
+    /* If no feature properties have been provided, i.e. only a region or country name has been provided, get the feature's properties */
     if (typeof prop === 'string') prop = getProp(prop, type);
+    /* If the event triggering this function was the end of a hover: */
     if (event === 'mouseout') {
+        /* If there was an active feature stored by a previous click, use that feature's properties in the remainder of this function */
         if (!!activeFeature) {
             type = activeFeature.type;
             prop = activeFeature.prop;
+        /* Otherwise, call removeActive() and stop this function */
         } else {
             removeActive();
             return;
         }
     }
+    /* Remove all features from the "active" layer */
     active.clearLayers();
+    /* Add the "inactive" class to all chart bars, causing them to become partially transparent */
     $('.bar').addClass('inactive');
+    /* Reset the active layer, reloading the country or region data */
     active = L.geoJSON(window[type + 'Data'], {
+        /* Disable interactivity on this layer, allowing pointer events to make it "down" to the underlying countries layer */
         interactive: false,
+        /* Show only the feature with a name that matches the name in the provided active feature's properties */
         filter: feature => feature.properties.name === prop.name,
         style: {
+            /* Don't fill the polygon */
             fill: false,
+            /* Use a black and thick outline */
             color: '#000',
             weight: 3
         }
     });
+    /* Add the "active" layer to the map if it isn't added already */
     active.addTo(map);
+    /* Set the header of the info box to be the active feature's name */
     $('#info-title').html(prop.name);
+    /* Hide all elements in the "stat" class */
     $('.stat').hide();
+    /* Show elements that are in both the "stat" class and the type of feature's ("country" or "region") class */
     $('.stat.' + type).show();
+    /* If the type of feature is country: */
     if (type === 'country') {
+        /* For chart bars in the class with the same name as this country's abbreviation, remove the "inactive" class, restoring their full opacity */
         $('.' + prop.abbr).removeClass('inactive');
+        /* For each theme, add the active feature's statistic for this theme to the info box */
         $.each(themes, theme => $(`#${theme}-stat`).html(formatStat(prop[theme], theme)));
+    /* If the type of feature is region: */
     } else if (type === 'region') {
+        /* For each country in this region, remove the "inactive" class from chart bars that are in the class with the same name as this country's abbreviation */
         prop.countries.forEach(abbr => $('.' + abbr).removeClass('inactive'));
+        /* For each theme: */
         $.each(themes, theme => {
+            /* Empty the country list in the info box for this theme */
             $(`#${theme}-list`).html(null);
+            /* For each country in this theme and this region: */
             $.each(themes[theme][prop.name], (i, v) => {
+                /* Append the country to this theme's country list, including the country's name, the statistic for this theme, and an event listener that makes this country active on click */
                 $(`#${theme}-list`).append(`
                     <div class="region-list-entry" onclick="makeActive('country', '${v[0]}', 'click')">
                         <p>${v[0]}</p>
@@ -400,36 +496,56 @@ function makeActive(type, prop, event) {
             });
         });
     }
+    /* For each contextual statistic in the info box: */
     $.each(contextStats, stat => {
+        /* If this statistic is the region, write the value straight to the info box without alteration */
         if (stat === 'region') $(`#${stat}-stat`).html(prop[stat]);
+        /* If this statistic is the FSI, round to one decimal point before writing to the info box */
         else if (stat === 'fsi') $(`#${stat}-stat`).html(prop[stat].toFixed(1));
+        /* Otherwise, this statistic is money-related and should be formatted as currency before writing to the info box */
         else $(`#${stat}-stat`).html(formatCurrency(prop[stat], 3));
     });
+    /* If the event that triggered this function was a click: */
     if (event === 'click') {
+        /* Show the info box */
         $('#info').show();
+        /* Invalidate the size of the map, causing it to rerender to accomodate the new size of the div it's in */
         map.invalidateSize();
+        /* Store the active feature's attributes for later use in lines 436-440 */
         activeFeature = {
             type: type,
             prop: prop
         };
+        /* Zoom and pan the map to the active feature's extent */
         map.fitBounds(active.getBounds());
     }
+    /* Invalidate the size of the map, causing it to rerender to accomodate the new size of the div it's in */
     map.invalidateSize();
 }
 
+/* When the region selector is changed: */
 $('#region-select').on('change', function() {
+    /* Make the selected region active */
     makeActive('region', $(this).val(), 'click');
+    /* Reset the region selector's text to the initial value */
     $(this).val('Go to a region...');
 });
 
+/* Functing removing any active features */
 function removeActive() {
+    /* Set the active feature to be null */
     activeFeature = null;
+    /* Remove the active feature from the "active" layer */
     active.clearLayers();
+    /* Remove the "inactive" class from all DOM elements currently in the class, removing any transparenecy effect on chart bars */
     $('.inactive').removeClass('inactive');
+    /* Hide the info box */
     $('#info').hide();
+    /* Invalidate the size of the map, causing it to rerender to accomodate the new size of the div it's in */
     map.invalidateSize();
 }
 
+/* When the info box's close button is clicked, call removeActive() */
 $('#close').on('click', function() {
     removeActive();
 });
