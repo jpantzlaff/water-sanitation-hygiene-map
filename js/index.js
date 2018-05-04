@@ -348,7 +348,7 @@ function drawCountries(mode, event='click') {
                         <p>${themes[mode].stat}</p>
                     </div>
                 `, {
-                    /* Make the tooltip follow the pointing cursor */
+                    /* Make the tooltip follow the cursor */
                     sticky: true
                 });
         }
