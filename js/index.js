@@ -1,3 +1,5 @@
+let hoverEnabled = true;
+
 /* List of possible themes (display modes), including text and color ramps to display */
 let themes = {
     drinking: {
@@ -170,7 +172,7 @@ $.get({
             
             /* Append an empty chart to the side panel, along with the relevant title, min/max values, and X-axis label */
             $('#charts').append(`
-                <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
+                <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="if (hoverEnabled) drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
                     <p class="chart-title">${themes[theme].title}</p>
                     <div class="chart-parent">
                         <div class="chart"></div>
@@ -250,6 +252,25 @@ $.get({
         $('body').css('visibility', 'visible');
     }
 });
+
+function distance(x1, y1, x2, y2) {
+    return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2));
+}
+
+function hoverLock() {
+    hoverEnabled = false;
+    let delta = 0;
+    let prevEvent;
+    $('body').on('mousemove', function(e) {
+        if (!!prevEvent) delta += distance(prevEvent.pageX, prevEvent.pageY, e.pageX, e.pageY);
+        console.log(e);
+        console.log(delta);
+        if (delta > 300) {
+            hoverEnabled = true;
+            $('body').off('mousemove');
+        } else prevEvent = e;
+    });
+}
 
 /* Function sorting arrays by values in nested arrays (e.g. [[key1,value1],[key2,value2]]) */
 function sortInArray(arr, invert) {
@@ -352,7 +373,7 @@ function drawCountries(mode, event='click') {
                 .on('mouseout', function() {
                     clearTimeout(timeout);
                     layer.unbindTooltip();
-                    makeActive('country', p, 'mouseout');
+                    setTimeout(() => makeActive('country', p, 'mouseout'), 300);
                 });
         }
     });
@@ -401,7 +422,7 @@ function makeActiveD3(d) {
     /* Get the current theme's properties */
     let p = themes[currentMode];
     /* If a hover triggered this function: */
-    if (event.type === 'mouseover') {
+    if (event.type === 'mouseover' && hoverEnabled) {
         setTimeout(function() {
             if ($(event.target).filter(':hover').length > 0) {
                 /* Call makeActive() with this country's properties and this pointer event */
@@ -538,6 +559,7 @@ function makeActive(type, prop, event) {
 
 /* When the region selector is changed: */
 $('#region-select').on('change', function() {
+    hoverLock();
     /* Make the selected region active */
     makeActive('region', $(this).val(), 'click');
     /* Reset the region selector's text to the initial value */
