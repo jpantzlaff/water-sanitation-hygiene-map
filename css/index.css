@@ -103,7 +103,7 @@ body {
 }
 .chart-labels :nth-child(2n+1) {
     text-align: center;
-    flex-basis: 3em;
+    flex-basis: 2em;
     font-size: 90%;
 }
 .chart-labels :nth-child(2) {

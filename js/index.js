@@ -69,7 +69,7 @@ let map = L.map('map', {
     renderer: L.canvas(),
     /* Restrict zooming to a few zoom levels */
     minZoom: 3,
-    maxZoom: 6,
+    maxZoom: 5,
     /* Limit panning to the area of interest */
     maxBounds: [[-38, -30], [56, 155]],
     maxBoundsViscosity: 0.9,
@@ -329,27 +329,30 @@ function drawCountries(mode, event='click') {
             /* Get the feature's properties */
             let p = feature.properties;
             /* When the feature is clicked on, hovered over, or no longer hovered over, call makeActive() with the feature's properties and the event's name */
+            let timeout;
             layer
                 .on('click', function() {
                     makeActive('country', p, 'click');
                 })
                 .on('mouseover', function() {
-                    makeActive('country', p, 'mouseover');
+                    /* Bind a tooltip to the feature containing the country name, statistic name, statistic, and statistic description */
+                    layer.bindTooltip(`
+                        <p>${p.name}</p>
+                        <p>${themes[mode].title}</p>
+                        <div style="display:flex">
+                            <p>${formatStat(p[mode], mode)}</p>
+                            <p>${themes[mode].stat}</p>
+                        </div>
+                    `);
+                    timeout = setTimeout(function() {
+                        layer.openTooltip();
+                        makeActive('country', p, 'mouseover');
+                    }, 300);
                 })
                 .on('mouseout', function() {
+                    clearTimeout(timeout);
+                    layer.unbindTooltip();
                     makeActive('country', p, 'mouseout');
-                })
-                /* Bind a tooltip to the feature containing the country name, statistic name, statistic, and statistic description */
-                .bindTooltip(`
-                    <p>${p.name}</p>
-                    <p>${themes[mode].title}</p>
-                    <div style="display:flex">
-                        <p>${formatStat(p[mode], mode)}</p>
-                        <p>${themes[mode].stat}</p>
-                    </div>
-                `, {
-                    /* Make the tooltip follow the cursor */
-                    sticky: true
                 });
         }
     });
@@ -394,29 +397,39 @@ function makeActiveD3(d) {
     /* Get the pointer event */
     let event = d3.event;
     /* Call makeActive() with this country's properties and this pointer event */
-    makeActive('country', d.properties, event.type);
+    if (event.type === 'click') makeActive('country', d.properties, event.type);
     /* Get the current theme's properties */
     let p = themes[currentMode];
     /* If a hover triggered this function: */
     if (event.type === 'mouseover') {
-        /* Set the chart tooltip's content to contain the country name, statistic name, statistic, and statistic description */
-        $('#chart-tooltip')
-            .html(`
-                <div class="leaflet-tooltip">
-                    <p>${d.properties.name}</p>
-                    <p>${p.title}</p>
-                    <div style="display:flex">
-                        <p>${formatStat(d.properties[currentMode], currentMode)}</p>
-                        <p>${p.stat}</p>
-                    </div>
-                </div>
-            `)
-            /* Make the tooltip visible and position it to be near the cursor */
-            .css('visibility', 'visible')
-            .css('top', (event.pageY - 30) + 'px')
-            .css('left', (event.pageX + 10) + 'px');
+        setTimeout(function() {
+            if ($(event.target).filter(':hover').length > 0) {
+                /* Call makeActive() with this country's properties and this pointer event */
+                makeActive('country', d.properties, event.type);
+                /* Set the chart tooltip's content to contain the country name, statistic name, statistic, and statistic description */
+                $('#chart-tooltip')
+                    .html(`
+                        <div class="leaflet-tooltip">
+                            <p>${d.properties.name}</p>
+                            <p>${p.title}</p>
+                            <div style="display:flex">
+                                <p>${formatStat(d.properties[currentMode], currentMode)}</p>
+                                <p>${p.stat}</p>
+                            </div>
+                        </div>
+                    `)
+                    /* Make the tooltip visible and position it to be near the cursor */
+                    .css('visibility', 'visible')
+                    .css('top', (event.pageY - 30) + 'px')
+                    .css('left', (event.pageX + 10) + 'px');
+            }
+        }, 300);
     /* If the end of a hover triggered this function, hide the tooltip: */
-    } else if (event.type === 'mouseout') $('#chart-tooltip').css('visibility', 'hidden');
+    } else if (event.type === 'mouseout') {
+        /* Call makeActive() with this country's properties and this pointer event */
+        makeActive('country', d.properties, event.type);
+        $('#chart-tooltip').css('visibility', 'hidden');
+    }
 }
 
 /* Function getting all properties for a region or country if only its name is provided */
