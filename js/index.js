@@ -76,7 +76,7 @@ let map = L.map('map', {
     minZoom: 3,
     maxZoom: 5,
     /* Limit panning to the area of interest */
-    maxBounds: [[-55, -55], [70, 165]],
+    maxBounds: [[-55, -55], [70, 170]],
     maxBoundsViscosity: 0.9,
     /* Remove zoom buttons */
     zoomControl: false,
