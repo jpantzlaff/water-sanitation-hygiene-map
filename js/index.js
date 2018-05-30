@@ -1,4 +1,5 @@
 let hoverEnabled = true;
+$('#country-stats, #region-stats').hide();
 
 /* List of possible themes (display modes), including text and color ramps to display */
 let themes = {
@@ -68,12 +69,14 @@ let activeFeature = null;
 /* Create a Leaflet map in the "map" div */
 let map = L.map('map', {
     /* Render with Canvas rather than the default SVG */
-    renderer: L.canvas(),
+    renderer: L.canvas({
+        padding: 3
+    }),
     /* Restrict zooming to a few zoom levels */
     minZoom: 3,
     maxZoom: 5,
     /* Limit panning to the area of interest */
-    maxBounds: [[-38, -30], [56, 155]],
+    maxBounds: [[-55, -55], [70, 165]],
     maxBoundsViscosity: 0.9,
     /* Remove zoom buttons */
     zoomControl: false,
@@ -253,6 +256,15 @@ $.get({
     }
 });
 
+function resetBounds(wait) {
+    setTimeout(function() {
+        map.invalidateSize({
+            animate: true,
+            easeLinearity: 0.7
+        });
+    }, wait);
+}
+
 function distance(x1, y1, x2, y2) {
     return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2));
 }
@@ -263,8 +275,6 @@ function hoverLock() {
     let prevEvent;
     $('body').on('mousemove', function(e) {
         if (!!prevEvent) delta += distance(prevEvent.pageX, prevEvent.pageY, e.pageX, e.pageY);
-        console.log(e);
-        console.log(delta);
         if (delta > 300) {
             hoverEnabled = true;
             $('body').off('mousemove');
@@ -337,7 +347,8 @@ function drawCountries(mode, event='click') {
             let p = feature.properties;
             return {
                 /* If the feature's statistic for this theme is not null, use this theme's color ramp to determine the color; otherwise, use white */
-                fillColor: (p[mode] !== null ? themes[mode].scale(p[mode]) : 'white'),
+                fill: (p[mode] !== null),
+                fillColor: (p[mode] !== null ? themes[mode].scale(p[mode]) : null),
                 /* Use this theme's opacity ramp to determine opacity */
                 fillOpacity: themes[mode].opacity(p[mode]),
                 /* Make the feature outlines black and very narrow */
@@ -504,6 +515,8 @@ function makeActive(type, prop, event) {
     $('.stat').hide();
     /* Show elements that are in both the "stat" class and the type of feature's ("country" or "region") class */
     $('.stat.' + type).show();
+    $('.stats').not(`#${type}-stats`).slideUp(300);
+    $(`#${type}-stats`).slideDown(300);
     /* If the type of feature is country: */
     if (type === 'country') {
         /* For chart bars in the class with the same name as this country's abbreviation, remove the "inactive" class, restoring their full opacity */
@@ -542,19 +555,19 @@ function makeActive(type, prop, event) {
     /* If the event that triggered this function was a click: */
     if (event === 'click') {
         /* Show the info box */
-        $('#info').show();
+        $('#info').slideDown(300);
         /* Invalidate the size of the map, causing it to rerender to accomodate the new size of the div it's in */
-        map.invalidateSize();
+        resetBounds(300);
         /* Store the active feature's attributes for later use in lines 436-440 */
         activeFeature = {
             type: type,
             prop: prop
         };
         /* Zoom and pan the map to the active feature's extent */
-        map.fitBounds(active.getBounds());
+        setTimeout(() => map.flyToBounds(active.getBounds()), 500);
     }
     /* Invalidate the size of the map, causing it to rerender to accomodate the new size of the div it's in */
-    map.invalidateSize();
+    resetBounds(300);
 }
 
 /* When the region selector is changed: */
@@ -575,9 +588,9 @@ function removeActive() {
     /* Remove the "inactive" class from all DOM elements currently in the class, removing any transparenecy effect on chart bars */
     $('.inactive').removeClass('inactive');
     /* Hide the info box */
-    $('#info').hide();
+    $('#info').slideUp(300);
     /* Invalidate the size of the map, causing it to rerender to accomodate the new size of the div it's in */
-    map.invalidateSize();
+    resetBounds(300);
 }
 
 /* When the info box's close button is clicked, call removeActive() */
