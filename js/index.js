@@ -1,4 +1,6 @@
 let hoverEnabled = true;
+let chartHoverActive = false;
+let featureHoverActive = false;
 $('#country-stats, #region-stats').hide();
 
 /* List of possible themes (display modes), including text and color ramps to display */
@@ -175,7 +177,7 @@ $.get({
             
             /* Append an empty chart to the side panel, along with the relevant title, min/max values, and X-axis label */
             $('#charts').append(`
-                <div id="${theme}-chart" class="chart-tile" onclick="drawCountries('${theme}', 'click')" onmouseover="if (hoverEnabled) drawCountries('${theme}', 'mouseover')" onmouseout="drawCountries('${theme}', 'mouseout')">
+                <div id="${theme}-chart" class="chart-tile">
                     <p class="chart-title">${themes[theme].title}</p>
                     <div class="chart-parent">
                         <div class="chart"></div>
@@ -187,6 +189,23 @@ $.get({
                     </div>
                 </div>
             `);
+            /* Bind event listeners to the new chart */
+            $(`#${theme}-chart`)
+                .on('click', () => drawCountries(theme, 'click'))
+                .on('mouseout', function() {
+                    chartHoverActive = false;
+                    setTimeout(() => {
+                        if (!chartHoverActive) drawCountries(theme, 'mouseout');
+                    }, 200);
+                })
+                .on('mouseover', function(e) {
+                    if (hoverEnabled) {
+                        chartHoverActive = true;
+                        setTimeout(() => {
+                            if ($(e.target).filter(':hover').length > 0) drawCountries(theme, 'mouseover');
+                        }, 200);
+                    }
+                });
             
             let chart = d3.select(`#${theme}-chart .chart`);
 
