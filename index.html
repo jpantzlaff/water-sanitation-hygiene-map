@@ -18,7 +18,7 @@
         <!-- Tooltip for chart -->
         <div id="chart-tooltip"></div>
         <!-- Splash screen -->
-        <div id="splash" class="w3-modal" style="display:block">
+        <div id="splash" class="w3-modal" style="display:flex">
             <div class="w3-modal-content">
                 <!-- Citation list -->
                 <div id="splash-container" class="w3-theme-d4">
@@ -32,6 +32,7 @@
                         <li>Nearly 1,000 children die each day due to preventable water and sanitation-related diarrheal diseases</li>
                     </ul>
                     <p>This application is intended to assist philanthropic individuals and charities looking to fund projects related to water, sanitation, and hygiene. Its geographic focus is on Africa and Asia, as they contain the regions and nations that need the most assistance in achieving this goal.</p>
+                    <button id="close-splash" class="w3-btn w3-round w3-theme-dark" onclick="$('#splash').fadeOut(1000);">Continue</button>
                 </div>
             </div>
         </div>
@@ -78,13 +79,13 @@
         <div id="credits" class="w3-modal">
             <div class="w3-modal-content">
                 <!-- Modal header -->
-                <header class="w3-container w3-theme-d4" style="margin-bottom:1em; padding-right:0">
+                <header class="w3-container w3-theme-d4" style="padding-right:0">
                     <!-- Close button -->
-                    <div onclick="$('#credits').hide()" class="close" style="top:10px" title="Close">&times;</div>
+                    <div onclick="$('#credits').fadeOut(1000)" class="close" style="top:10px" title="Close">&times;</div>
                     <h5>Data Sources</h5>
                 </header>
                 <!-- Citation list -->
-                <div class="w3-container">
+                <div class="w3-container w3-white" style="padding-top:1em">
                     <h6>Basic and safely managed drinking water services</h6>
                     <p class="citation">World Health Organization (2017). <i>Basic and safely managed drinking water services: Data by country</i>. Retrieved from <a target="_blank" href="http://apps.who.int/gho/data/node.main.WSHWATER?lang=en">http://apps.who.int/gho/data/node.main.WSHWATER?lang=en</a></p>
                     <h6>Basic and safely managed sanitation services</h6>
