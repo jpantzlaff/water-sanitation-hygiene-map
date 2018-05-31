@@ -447,31 +447,6 @@ function formatCurrency(v, precision) {
     else return '$' + styled;
 }
 
-/*
-.on('mouseout', function() {
-                    featureHoverActive = false;
-                    clearTimeout(timeout);
-                    layer.unbindTooltip();
-                    setTimeout(() => {
-                        if (!featureHoverActive) makeActive('country', p, 'mouseout');
-                    }, 300);
-                })
-                .on('mouseover', function() {
-                    featureHoverActive = true;
-                    layer.bindTooltip(`
-                        <p>${p.name}</p>
-                        <p>${themes[mode].title}</p>
-                        <div style="display:flex">
-                            <p>${formatStat(p[mode], mode)}</p>
-                            <p>${themes[mode].stat}</p>
-                        </div>
-                    `);
-                    timeout = setTimeout(function() {
-                        layer.openTooltip();
-                        makeActive('country', p, 'mouseover');
-                    }, 300);
-                });
-*/
 /* Function handling pointer events on chart bars */
 function makeActiveD3(d) {
     /* Get the pointer event */

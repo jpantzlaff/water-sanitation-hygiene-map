@@ -14,12 +14,35 @@ html, body, #wrapper {
 ::-webkit-scrollbar-thumb {
 	background-color: #555;
 }
-.w3-modal {
-    z-index: 1000 !important;
-    padding-bottom: 100px;
-}
 body {
     visibility: hidden;
+}
+h1, h2 {
+    text-align: center;
+    margin: 0;
+}
+h1 {
+    font-size: 2em;
+}
+h2 {
+    font-size: 1.5em;
+}
+.w3-modal {
+    z-index: 10000 !important;
+    padding-bottom: 100px;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+}
+#splash-container {
+    padding: 1em;
+}
+#splash-container p, li {
+    font-size: 108%;
+}
+#splash-container p {
+    text-align: justify;
+}
+#splash-container p:last-child {
+    margin-bottom: 0;
 }
 #wrapper {
     display: flex;
