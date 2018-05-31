@@ -82,10 +82,17 @@ body {
     flex: 0 0 auto;
     border: none;
     padding: 0.5em;
+    transition: background-color 600ms;
+    cursor: pointer;
+    color: #fff;
+    background-color: #818181;
 }
 #region-select > option {
-    color: #000;
-    background-color: #dfdfdf;
+    color: #fff;
+    background-color: #444444;
+}
+#region-select:hover {
+    background-color: #8b8b8b;
 }
 #charts {
     flex: 1 1 auto;
