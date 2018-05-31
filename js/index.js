@@ -385,7 +385,16 @@ function drawCountries(mode, event='click') {
                 .on('click', function() {
                     makeActive('country', p, 'click');
                 })
+                .on('mouseout', function() {
+                    featureHoverActive = false;
+                    clearTimeout(timeout);
+                    layer.unbindTooltip();
+                    setTimeout(() => {
+                        if (!featureHoverActive) makeActive('country', p, 'mouseout');
+                    }, 300);
+                })
                 .on('mouseover', function() {
+                    featureHoverActive = true;
                     /* Bind a tooltip to the feature containing the country name, statistic name, statistic, and statistic description */
                     layer.bindTooltip(`
                         <p>${p.name}</p>
@@ -399,11 +408,6 @@ function drawCountries(mode, event='click') {
                         layer.openTooltip();
                         makeActive('country', p, 'mouseover');
                     }, 300);
-                })
-                .on('mouseout', function() {
-                    clearTimeout(timeout);
-                    layer.unbindTooltip();
-                    setTimeout(() => makeActive('country', p, 'mouseout'), 300);
                 });
         }
     });
@@ -443,6 +447,31 @@ function formatCurrency(v, precision) {
     else return '$' + styled;
 }
 
+/*
+.on('mouseout', function() {
+                    featureHoverActive = false;
+                    clearTimeout(timeout);
+                    layer.unbindTooltip();
+                    setTimeout(() => {
+                        if (!featureHoverActive) makeActive('country', p, 'mouseout');
+                    }, 300);
+                })
+                .on('mouseover', function() {
+                    featureHoverActive = true;
+                    layer.bindTooltip(`
+                        <p>${p.name}</p>
+                        <p>${themes[mode].title}</p>
+                        <div style="display:flex">
+                            <p>${formatStat(p[mode], mode)}</p>
+                            <p>${themes[mode].stat}</p>
+                        </div>
+                    `);
+                    timeout = setTimeout(function() {
+                        layer.openTooltip();
+                        makeActive('country', p, 'mouseover');
+                    }, 300);
+                });
+*/
 /* Function handling pointer events on chart bars */
 function makeActiveD3(d) {
     /* Get the pointer event */
@@ -453,10 +482,11 @@ function makeActiveD3(d) {
     let p = themes[currentMode];
     /* If a hover triggered this function: */
     if (event.type === 'mouseover' && hoverEnabled) {
+        featureHoverActive = true;
         setTimeout(function() {
             if ($(event.target).filter(':hover').length > 0) {
                 /* Call makeActive() with this country's properties and this pointer event */
-                makeActive('country', d.properties, event.type);
+                makeActive('country', d.properties, 'mouseover');
                 /* Set the chart tooltip's content to contain the country name, statistic name, statistic, and statistic description */
                 $('#chart-tooltip')
                     .html(`
@@ -477,8 +507,11 @@ function makeActiveD3(d) {
         }, 300);
     /* If the end of a hover triggered this function, hide the tooltip: */
     } else if (event.type === 'mouseout') {
+        featureHoverActive = false;
         /* Call makeActive() with this country's properties and this pointer event */
-        makeActive('country', d.properties, event.type);
+        setTimeout(() => {
+            if (!featureHoverActive) makeActive('country', d.properties, 'mouseout');
+        }, 300);
         $('#chart-tooltip').css('visibility', 'hidden');
     }
 }
