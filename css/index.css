@@ -57,6 +57,10 @@ h2 {
     align-self: center;
     letter-spacing: 0.1em;
     font-size: 115%;
+	transition: background-color 600ms;
+}
+#close-splash:hover {
+	background-color: #2f2f2f !important;
 }
 #wrapper {
     display: flex;
