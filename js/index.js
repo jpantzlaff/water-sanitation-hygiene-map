@@ -391,7 +391,7 @@ function drawCountries(mode, event='click') {
                     layer.unbindTooltip();
                     setTimeout(() => {
                         if (!featureHoverActive) makeActive('country', p, 'mouseout');
-                    }, 300);
+                    }, 240);
                 })
                 .on('mouseover', function() {
                     featureHoverActive = true;
@@ -407,7 +407,7 @@ function drawCountries(mode, event='click') {
                     timeout = setTimeout(function() {
                         layer.openTooltip();
                         makeActive('country', p, 'mouseover');
-                    }, 300);
+                    }, 240);
                 });
         }
     });
@@ -479,14 +479,14 @@ function makeActiveD3(d) {
                     .css('top', (event.pageY - 30) + 'px')
                     .css('left', (event.pageX + 10) + 'px');
             }
-        }, 300);
+        }, 240);
     /* If the end of a hover triggered this function, hide the tooltip: */
     } else if (event.type === 'mouseout') {
         featureHoverActive = false;
         /* Call makeActive() with this country's properties and this pointer event */
         setTimeout(() => {
             if (!featureHoverActive) makeActive('country', d.properties, 'mouseout');
-        }, 300);
+        }, 240);
         $('#chart-tooltip').css('visibility', 'hidden');
     }
 }
